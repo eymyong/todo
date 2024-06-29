@@ -9,9 +9,11 @@ import (
 	"github.com/eymyong/TODO-CLI/repo"
 	"github.com/eymyong/TODO-CLI/repo/jsonfile"
 	"github.com/eymyong/TODO-CLI/repo/jsonfilemap"
+	"github.com/eymyong/TODO-CLI/repo/textfile"
 	"github.com/google/uuid"
 )
 
+//git remote origin https://github.com/eymyong/todo.git
 // git add -A
 // git commit -m "homework"
 // git push origin main
@@ -38,6 +40,10 @@ type job struct {
 	mode Mode
 }
 
+const JsonFile = "json"
+const JsonMap = "jsonmap"
+const TextFile = "text"
+
 func main() {
 	args := os.Args
 	job, err := parse(args)
@@ -49,16 +55,24 @@ func main() {
 	envFile := os.Getenv("FILENAME")
 
 	var repo repo.Repository
-	if envRepo == "json" {
+	if envRepo == JsonFile {
 		if envFile == "" {
 			envFile = "todo.json"
 		}
 		repo = jsonfile.New(envFile)
-	} else {
+	}
+	if envRepo == JsonMap {
 		if envFile == "" {
 			envFile = "todo.map.json"
 		}
 		repo = jsonfilemap.New(envFile)
+	}
+	if envRepo == TextFile {
+		if envFile == "" {
+			envFile = "todo.text"
+		}
+
+		repo = textfile.New(envFile)
 	}
 
 	switch job.mode {

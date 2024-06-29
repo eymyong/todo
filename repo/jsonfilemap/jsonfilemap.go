@@ -130,14 +130,10 @@ func (j *RepoJsonFileMap) Remove(id string) (model.Todo, error) {
 
 func New(fileName string) repo.Repository {
 	fileBytes, err := os.ReadFile(fileName)
-	if err != nil {
-		panic(err)
-	}
-
-	if len(fileBytes) == 0 {
-		err = os.WriteFile(fileName, []byte("{}"), os.ModePerm)
+	if err != nil || len(fileBytes) == 0 {
+		err := os.WriteFile(fileName, []byte("{}"), os.ModePerm)
 		if err != nil {
-			panic(err)
+			panic("failed to write empty array to init file: " + err.Error())
 		}
 	}
 
