@@ -14,12 +14,12 @@ import (
 	"github.com/eymyong/todo/repo"
 )
 
-type Server struct {
+type HandlerTodo struct {
 	repo repo.Repository
 }
 
-func New(repo repo.Repository) *Server {
-	return &Server{repo: repo}
+func New(repo repo.Repository) *HandlerTodo {
+	return &HandlerTodo{repo: repo}
 }
 
 func sendJson(w http.ResponseWriter, status int, data interface{}) {
@@ -40,7 +40,7 @@ func readBody(r *http.Request) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (s *Server) GetById(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerTodo) GetById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["todo-id"]
 	if id == "" {
@@ -51,7 +51,7 @@ func (s *Server) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo, err := s.repo.Get(id)
+	todo, err := h.repo.Get(id)
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  fmt.Sprintf("failed to get todo %s", id),
@@ -64,8 +64,8 @@ func (s *Server) GetById(w http.ResponseWriter, r *http.Request) {
 	sendJson(w, http.StatusOK, todo)
 }
 
-func (s *Server) GetAll(w http.ResponseWriter, r *http.Request) {
-	todos, err := s.repo.GetAll()
+func (h *HandlerTodo) GetAll(w http.ResponseWriter, r *http.Request) {
+	todos, err := h.repo.GetAll()
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  "failed to get all todos",
@@ -84,7 +84,7 @@ func (s *Server) GetAll(w http.ResponseWriter, r *http.Request) {
 	sendJson(w, http.StatusOK, m)
 }
 
-func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerTodo) Add(w http.ResponseWriter, r *http.Request) {
 	b, err := readBody(r)
 	if err != nil {
 		sendJson(w, http.StatusBadRequest, map[string]interface{}{
@@ -101,7 +101,7 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 		Data: body,
 	}
 
-	err = s.repo.Add(todo)
+	err = h.repo.Add(todo)
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  "failed to create todo",
@@ -117,7 +117,7 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerTodo) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, ok := vars["todo-id"]
 	if !ok {
@@ -127,7 +127,7 @@ func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo, err := s.repo.Remove(id)
+	todo, err := h.repo.Remove(id)
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  fmt.Sprintf("failed to remove id %s", id),
