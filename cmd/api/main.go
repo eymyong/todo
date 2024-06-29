@@ -1,9 +1,10 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
 
 	"github.com/eymyong/TODO-CLI/cmd/api/internal/server"
 	"github.com/eymyong/TODO-CLI/repo"
@@ -42,35 +43,14 @@ func initRepo() repo.Repository {
 	return repo
 }
 
-func helloWorld(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World\n"))
-}
-
-func yong(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("kuy\n"))
-}
-
 func main() {
 	repo := initRepo()
 	serv := server.New(repo)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/yong", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("kuy\n"))
-	})
+	r := mux.NewRouter()
+	r.HandleFunc("/get-all", serv.GetAll).Methods(http.MethodGet)
+	r.HandleFunc("/add", serv.Add).Methods(http.MethodPost)
+	r.HandleFunc("/delete/{todo-id}", serv.Delete).Methods(http.MethodDelete)
 
-	mux.HandleFunc("/hello", helloWorld)
-	mux.HandleFunc("/get-all", serv.GetAll)
-	mux.HandleFunc("/add", serv.Add)
-
-	// host/add
-
-	server := http.Server{
-		Addr:    ":8000",
-		Handler: mux,
-	}
-	err := server.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
-	}
+	http.ListenAndServe(":8000", r)
 }

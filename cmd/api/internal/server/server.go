@@ -10,6 +10,7 @@ import (
 	"github.com/eymyong/TODO-CLI/model"
 	"github.com/eymyong/TODO-CLI/repo"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -78,12 +79,34 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 
 	err = s.repo.Add(todo)
 	if err != nil {
-		errMsg := fmt.Sprintf("error add repo: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
+		fmt.Fprintf(w, "error add repo: %s", err.Error())
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(body))
+}
+
+func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, ok := vars["todo-id"]
+	if !ok {
+		w.WriteHeader(400)
+		w.Write([]byte("missing id"))
+		return
+	}
+
+	todo, err := s.repo.Remove(id)
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "failed to remove id %s: %s\n", id, err.Error())
+		return
+	}
+
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"sucess":  "ok",
+		"deleted": todo,
+	})
 }
