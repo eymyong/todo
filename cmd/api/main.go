@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/eymyong/todo/cmd/api/internal/server"
+	"github.com/eymyong/todo/cmd/api/internal/handler"
 	"github.com/eymyong/todo/repo"
 	"github.com/eymyong/todo/repo/jsonfile"
 	"github.com/eymyong/todo/repo/jsonfilemap"
@@ -45,13 +45,13 @@ func initRepo() repo.Repository {
 
 func main() {
 	repo := initRepo()
-	serv := server.New(repo)
+	h := handler.New(repo)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/get-all", serv.GetAll).Methods(http.MethodGet)
-	r.HandleFunc("/get/{todo-id}", serv.GetById).Methods(http.MethodGet)
-	r.HandleFunc("/add", serv.Add).Methods(http.MethodPost)
-	r.HandleFunc("/delete/{todo-id}", serv.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/get-all", h.GetAll).Methods(http.MethodGet)
+	r.HandleFunc("/get/{todo-id}", h.GetById).Methods(http.MethodGet)
+	r.HandleFunc("/add", h.Add).Methods(http.MethodPost)
+	r.HandleFunc("/delete/{todo-id}", h.Delete).Methods(http.MethodDelete)
 
 	http.ListenAndServe(":8000", r)
 }
