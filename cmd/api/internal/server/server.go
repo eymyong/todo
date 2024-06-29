@@ -44,29 +44,34 @@ func (s *Server) GetById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["todo-id"]
 	if id == "" {
-		sendJson(w, 400, map[string]interface{}{
+		sendJson(w, http.StatusBadRequest, map[string]interface{}{
 			"error": "missing id",
 		})
+
 		return
 	}
 
 	todo, err := s.repo.Get(id)
 	if err != nil {
-		sendJson(w, 500, map[string]interface{}{
+		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  fmt.Sprintf("failed to get todo %s", id),
 			"reason": err.Error(),
 		})
+
 		return
 	}
 
-	sendJson(w, 200, todo)
+	sendJson(w, http.StatusOK, todo)
 }
 
 func (s *Server) GetAll(w http.ResponseWriter, r *http.Request) {
 	todos, err := s.repo.GetAll()
 	if err != nil {
-		errMsg := fmt.Sprintf("error reading from repo: %s", err.Error())
-		sendJson(w, 500, errMsg)
+		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":  "failed to get all todos",
+			"reason": err.Error(),
+		})
+
 		return
 	}
 
@@ -76,14 +81,17 @@ func (s *Server) GetAll(w http.ResponseWriter, r *http.Request) {
 		m[t.Id] = t.Data
 	}
 
-	sendJson(w, 200, m)
+	sendJson(w, http.StatusOK, m)
 }
 
 func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 	b, err := readBody(r)
 	if err != nil {
-		errMsg := fmt.Sprintf("error readbody to json: %s", err.Error())
-		sendJson(w, 500, errMsg)
+		sendJson(w, http.StatusBadRequest, map[string]interface{}{
+			"error":  "failed to read body",
+			"reason": err.Error(),
+		})
+
 		return
 	}
 
@@ -95,30 +103,40 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 
 	err = s.repo.Add(todo)
 	if err != nil {
-		errMsg := fmt.Sprintf("error add repo: %s", err.Error())
-		sendJson(w, 500, errMsg)
+		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":  "failed to create todo",
+			"reason": err.Error(),
+		})
+
 		return
 	}
 
-	sendJson(w, 200, todo)
+	sendJson(w, 201, map[string]interface{}{
+		"success": "ok",
+		"created": todo,
+	})
 }
 
 func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, ok := vars["todo-id"]
 	if !ok {
-		sendJson(w, 400, "missing id")
+		sendJson(w, http.StatusBadRequest, map[string]interface{}{
+			"error": "missing id",
+		})
 		return
 	}
 
 	todo, err := s.repo.Remove(id)
 	if err != nil {
-		errMsg := fmt.Sprintf("failed to remove id %s: %s\n", id, err.Error())
-		sendJson(w, 500, errMsg)
+		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":  fmt.Sprintf("failed to remove id %s", id),
+			"reason": err.Error(),
+		})
 		return
 	}
 
-	sendJson(w, 200, map[string]interface{}{
+	sendJson(w, http.StatusOK, map[string]interface{}{
 		"sucess":  "ok",
 		"deleted": todo,
 	})
