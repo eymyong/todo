@@ -49,6 +49,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/get-all", serv.GetAll).Methods(http.MethodGet)
+	r.HandleFunc("/get/{todo-id}", serv.Get).Methods(http.MethodGet)
 	r.HandleFunc("/add", serv.Add).Methods(http.MethodPost)
 	r.HandleFunc("/delete/{todo-id}", serv.Delete).Methods(http.MethodDelete)
 

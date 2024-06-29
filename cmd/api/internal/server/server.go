@@ -33,6 +33,36 @@ func readBody(r *http.Request) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+func sendJson(w http.ResponseWriter, status int, data interface{}) {
+	w.WriteHeader(status)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func (s *Server) Get(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["todo-id"]
+	if id == "" {
+		sendJson(w, 400, map[string]interface{}{
+			"error": "missing id",
+		})
+
+		return
+	}
+
+	todo, err := s.repo.Get(id)
+	if err != nil {
+		sendJson(w, 500, map[string]interface{}{
+			"error":  fmt.Sprintf("failed to get todo %s", id),
+			"reason": err.Error(),
+		})
+
+		return
+	}
+
+	sendJson(w, 200, todo)
+}
+
 func (s *Server) GetAll(w http.ResponseWriter, r *http.Request) {
 	todos, err := s.repo.GetAll()
 	if err != nil {
