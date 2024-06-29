@@ -111,7 +111,7 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sendJson(w, 201, map[string]interface{}{
+	sendJson(w, http.StatusCreated, map[string]interface{}{
 		"success": "ok",
 		"created": todo,
 	})
