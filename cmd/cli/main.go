@@ -9,7 +9,6 @@ import (
 	"github.com/eymyong/TODO-CLI/repo"
 	"github.com/eymyong/TODO-CLI/repo/jsonfile"
 	"github.com/eymyong/TODO-CLI/repo/jsonfilemap"
-	"github.com/eymyong/TODO-CLI/repo/textfile"
 	"github.com/google/uuid"
 )
 
@@ -44,6 +43,33 @@ const JsonFile = "json"
 const JsonMap = "jsonmap"
 const TextFile = "text"
 
+func initRepo() repo.Repository {
+	envRepo := os.Getenv("REPO")
+	envFile := os.Getenv("FILENAME")
+
+	var repo repo.Repository
+	switch envRepo {
+	case JsonMap:
+		if envFile == "" {
+			envFile = "todo.map.json"
+		}
+
+		repo = jsonfilemap.New(envFile)
+
+	case JsonFile:
+		fallthrough
+
+	default:
+		if envFile == "" {
+			envFile = "todo.json"
+		}
+
+		repo = jsonfile.New(envFile)
+	}
+
+	return repo
+}
+
 func main() {
 	args := os.Args
 	job, err := parse(args)
@@ -51,29 +77,7 @@ func main() {
 		panic(err)
 	}
 
-	envRepo := os.Getenv("REPO")
-	envFile := os.Getenv("FILENAME")
-
-	var repo repo.Repository
-	if envRepo == JsonFile {
-		if envFile == "" {
-			envFile = "todo.json"
-		}
-		repo = jsonfile.New(envFile)
-	}
-	if envRepo == JsonMap {
-		if envFile == "" {
-			envFile = "todo.map.json"
-		}
-		repo = jsonfilemap.New(envFile)
-	}
-	if envRepo == TextFile {
-		if envFile == "" {
-			envFile = "todo.text"
-		}
-
-		repo = textfile.New(envFile)
-	}
+	repo := initRepo()
 
 	switch job.mode {
 	case ModeAdd:
