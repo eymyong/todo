@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/eymyong/TODO-CLI/model"
-	"github.com/eymyong/TODO-CLI/repo"
-	"github.com/eymyong/TODO-CLI/repo/jsonfile"
-	"github.com/eymyong/TODO-CLI/repo/jsonfilemap"
+	"github.com/eymyong/todo/model"
+	"github.com/eymyong/todo/repo"
+	"github.com/eymyong/todo/repo/jsonfile"
+	"github.com/eymyong/todo/repo/jsonfilemap"
 	"github.com/google/uuid"
 )
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/eymyong/TODO-CLI/model"
-	"github.com/eymyong/TODO-CLI/repo"
+	"github.com/eymyong/todo/model"
+	"github.com/eymyong/todo/repo"
 )
 
 type RepoTextFile struct {

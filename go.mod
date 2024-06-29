@@ -1,4 +1,4 @@
-module github.com/eymyong/TODO-CLI
+module github.com/eymyong/todo
 
 go 1.22.1
 

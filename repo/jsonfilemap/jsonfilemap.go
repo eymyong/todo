@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/eymyong/TODO-CLI/model"
-	"github.com/eymyong/TODO-CLI/repo"
+	"github.com/eymyong/todo/model"
+	"github.com/eymyong/todo/repo"
 )
 
 type RepoJsonFileMap struct {

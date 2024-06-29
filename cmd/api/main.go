@@ -6,10 +6,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/eymyong/TODO-CLI/cmd/api/internal/server"
-	"github.com/eymyong/TODO-CLI/repo"
-	"github.com/eymyong/TODO-CLI/repo/jsonfile"
-	"github.com/eymyong/TODO-CLI/repo/jsonfilemap"
+	"github.com/eymyong/todo/cmd/api/internal/server"
+	"github.com/eymyong/todo/repo"
+	"github.com/eymyong/todo/repo/jsonfile"
+	"github.com/eymyong/todo/repo/jsonfilemap"
 )
 
 const JsonFile = "json"

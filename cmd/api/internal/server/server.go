@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/eymyong/TODO-CLI/model"
-	"github.com/eymyong/TODO-CLI/repo"
+	"github.com/eymyong/todo/model"
+	"github.com/eymyong/todo/repo"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )

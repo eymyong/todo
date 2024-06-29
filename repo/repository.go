@@ -1,6 +1,6 @@
 package repo
 
-import "github.com/eymyong/TODO-CLI/model"
+import "github.com/eymyong/todo/model"
 
 type Repository interface {
 	Add(model.Todo) error
