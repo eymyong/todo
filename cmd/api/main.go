@@ -52,6 +52,7 @@ func main() {
 	r.HandleFunc("/get/{todo-id}", h.GetById).Methods(http.MethodGet)
 	r.HandleFunc("/add", h.Add).Methods(http.MethodPost)
 	r.HandleFunc("/delete/{todo-id}", h.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/update/{todo-id}", h.UpdateId).Methods(http.MethodPatch)
 
 	http.ListenAndServe(":8000", r)
 }

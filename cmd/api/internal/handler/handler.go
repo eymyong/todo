@@ -22,13 +22,13 @@ func New(repo repo.Repository) *HandlerTodo {
 	return &HandlerTodo{repo: repo}
 }
 
-func sendJson(w http.ResponseWriter, status int, data interface{}) {
+func sendJson(w http.ResponseWriter, status int, data interface{}) { //
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
 }
 
-func readBody(r *http.Request) ([]byte, error) {
+func readBody(r *http.Request) ([]byte, error) { //
 	defer r.Body.Close()
 
 	buf := bytes.NewBuffer(nil)
@@ -41,8 +41,8 @@ func readBody(r *http.Request) ([]byte, error) {
 }
 
 func (h *HandlerTodo) GetById(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["todo-id"]
+	vars := mux.Vars(r)   //
+	id := vars["todo-id"] //
 	if id == "" {
 		sendJson(w, http.StatusBadRequest, map[string]interface{}{
 			"error": "missing id",
@@ -139,5 +139,39 @@ func (h *HandlerTodo) Delete(w http.ResponseWriter, r *http.Request) {
 	sendJson(w, http.StatusOK, map[string]interface{}{
 		"sucess":  "ok",
 		"deleted": todo,
+	})
+}
+
+func (h *HandlerTodo) UpdateId(w http.ResponseWriter, r *http.Request) {
+	b, err := readBody(r)
+	if err != nil {
+		sendJson(w, http.StatusBadRequest, map[string]interface{}{
+			"error":  "failed to read body",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, ok := vars["todo-id"]
+	if !ok {
+		sendJson(w, http.StatusBadRequest, map[string]interface{}{
+			"err": "missing id",
+		})
+		return
+	}
+
+	todo, err := h.repo.Update(id, string(b))
+	if err != nil {
+		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":  fmt.Sprintf("failed to update id %s", id),
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	sendJson(w, http.StatusOK, map[string]interface{}{
+		"sucess": fmt.Sprintf("update to id %s", id),
+		"update": todo,
 	})
 }
