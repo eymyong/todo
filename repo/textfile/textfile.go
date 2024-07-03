@@ -25,10 +25,18 @@ func (j *RepoTextFile) Get(id string) (model.Todo, error) {
 	panic("not implemented")
 }
 
-func (j *RepoTextFile) Update(id string, newdata string) (model.Todo, error) {
+func (j *RepoTextFile) GetAllStatus(status model.Status) ([]model.Todo, error) {
 	panic("not implemented")
 }
 
+func (j *RepoTextFile) UpdateData(id string, newdata string) (model.Todo, error) {
+	panic("not implemented")
+}
+
+func (j *RepoTextFile) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+
+	return model.Todo{}, nil
+}
 func (j *RepoTextFile) Remove(id string) (model.Todo, error) {
 	panic("not implemented")
 }

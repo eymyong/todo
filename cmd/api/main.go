@@ -49,10 +49,12 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/get-all", h.GetAll).Methods(http.MethodGet)
+	r.HandleFunc("/get-all-status", h.GetAllStatus).Methods(http.MethodGet)
 	r.HandleFunc("/get/{todo-id}", h.GetById).Methods(http.MethodGet)
 	r.HandleFunc("/add", h.Add).Methods(http.MethodPost)
 	r.HandleFunc("/delete/{todo-id}", h.Delete).Methods(http.MethodDelete)
 	r.HandleFunc("/update/{todo-id}", h.UpdateId).Methods(http.MethodPatch)
+	r.HandleFunc("/update-status/{todo-id}", h.UpdateStatus).Methods(http.MethodPatch)
 
 	http.ListenAndServe(":8000", r)
 }

@@ -192,7 +192,7 @@ func parse(args []string) (job, error) {
 }
 
 func methodUpdate(r repo.Repository, id string, newdata string) (model.Todo, error) {
-	todo, err := r.Update(id, newdata)
+	todo, err := r.UpdateData(id, newdata)
 	if err != nil {
 		return model.Todo{}, err
 	}

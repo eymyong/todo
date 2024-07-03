@@ -78,7 +78,11 @@ func (j *RepoJsonFileMap) Get(id string) (model.Todo, error) {
 	return todo, nil
 }
 
-func (j *RepoJsonFileMap) Update(id string, newdata string) (model.Todo, error) {
+func (j *RepoJsonFileMap) GetAllStatus(status model.Status) ([]model.Todo, error) {
+	panic("not implemented")
+}
+
+func (j *RepoJsonFileMap) UpdateData(id string, newdata string) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -101,6 +105,20 @@ func (j *RepoJsonFileMap) Update(id string, newdata string) (model.Todo, error) 
 	}
 
 	return old, nil
+}
+
+func (j *RepoJsonFileMap) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+	todos, err := readDecode(j.fileName)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	_, ok := todos[id]
+	if ok {
+
+	}
+
+	return model.Todo{}, nil
 }
 
 func (j *RepoJsonFileMap) Remove(id string) (model.Todo, error) {

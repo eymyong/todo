@@ -67,7 +67,23 @@ func (j *RepoJsonFile) Get(id string) (model.Todo, error) {
 	return model.Todo{}, fmt.Errorf("no id: %s", id)
 }
 
-func (j *RepoJsonFile) Update(id string, newdata string) (model.Todo, error) {
+func (j *RepoJsonFile) GetAllStatus(status model.Status) ([]model.Todo, error) {
+	todoList, err := readDecode(j.fileName)
+	if err != nil {
+		return []model.Todo{}, fmt.Errorf("failed to get jsonfile: %w", err)
+	}
+
+	var statusTodoList []model.Todo
+	for _, v := range todoList {
+		if v.Status == status {
+			statusTodoList = append(statusTodoList, v)
+		}
+	}
+
+	return statusTodoList, nil
+}
+
+func (j *RepoJsonFile) UpdateData(id string, newdata string) (model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, fmt.Errorf("failed to update jsonfile: %w", err)
@@ -97,6 +113,39 @@ func (j *RepoJsonFile) Update(id string, newdata string) (model.Todo, error) {
 	}
 
 	return old, nil
+}
+
+func (j *RepoJsonFile) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+	todos, err := readDecode(j.fileName)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	var old *model.Todo
+
+	for i := range todos {
+		t := &todos[i]
+		if id == t.Id {
+			old = t
+			t.Status = status
+		}
+
+	}
+
+	if old == nil {
+		return model.Todo{}, fmt.Errorf("id '%s' not found", id)
+	}
+
+	todosByte, err := json.Marshal(todos)
+	if err != nil {
+		return model.Todo{}, fmt.Errorf("failed to marshal jsonfile: %w", err)
+	}
+	err = os.WriteFile(j.fileName, todosByte, 0664)
+	if err != nil {
+		return model.Todo{}, fmt.Errorf("failed to writefile: %w", err)
+	}
+
+	return *old, nil
 }
 
 func (j *RepoJsonFile) Remove(id string) (model.Todo, error) {
