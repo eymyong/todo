@@ -25,7 +25,7 @@ func (j *RepoTextFile) Get(id string) (model.Todo, error) {
 	panic("not implemented")
 }
 
-func (j *RepoTextFile) GetAllStatus(status model.Status) ([]model.Todo, error) {
+func (j *RepoTextFile) GetStatus(status model.Status) ([]model.Todo, error) {
 	panic("not implemented")
 }
 

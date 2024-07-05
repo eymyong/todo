@@ -13,16 +13,21 @@ type RepoJsonFile struct {
 	fileName string
 }
 
+// ถ้าไม่มีข้อมูลในไฟล์ return []model.Todo{}
 func readDecode(fname string) ([]model.Todo, error) {
 	j, err := os.ReadFile(fname)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read jsonfile: %w", err)
 	}
 
+	if len(j) == 0 {
+		return []model.Todo{}, nil
+	}
+
 	todos := []model.Todo{}
 	err = json.Unmarshal(j, &todos)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal: %w", err)
 	}
 
 	return todos, nil
@@ -32,17 +37,20 @@ func (j *RepoJsonFile) Add(todo model.Todo) error {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return err
+		//return fmt.Errorf("failed to readDecode jsonfile: %w", err)
 	}
 
 	todoList = append(todoList, todo)
 	out, err := json.Marshal(todoList)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to marshal: %w", err)
+		//panic(err)
 	}
 
 	err = os.WriteFile(j.fileName, out, 0664)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to marshal: %w", err)
+		//panic(err)
 	}
 
 	return nil
@@ -67,7 +75,7 @@ func (j *RepoJsonFile) Get(id string) (model.Todo, error) {
 	return model.Todo{}, fmt.Errorf("no id: %s", id)
 }
 
-func (j *RepoJsonFile) GetAllStatus(status model.Status) ([]model.Todo, error) {
+func (j *RepoJsonFile) GetStatus(status model.Status) ([]model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, fmt.Errorf("failed to get jsonfile: %w", err)

@@ -78,7 +78,7 @@ func (j *RepoJsonFileMap) Get(id string) (model.Todo, error) {
 	return todo, nil
 }
 
-func (j *RepoJsonFileMap) GetAllStatus(status model.Status) ([]model.Todo, error) {
+func (j *RepoJsonFileMap) GetStatus(status model.Status) ([]model.Todo, error) {
 	panic("not implemented")
 }
 

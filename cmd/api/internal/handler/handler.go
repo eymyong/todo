@@ -119,7 +119,7 @@ func (h *HandlerTodo) GetAllStatus(w http.ResponseWriter, r *http.Request) {
 		rr.Status = model.StatusTodo
 	}
 
-	statusTodoList, err := h.repo.GetAllStatus(rr.Status)
+	statusTodoList, err := h.repo.GetStatus(rr.Status)
 	if err != nil {
 		sendJson(w, 400, map[string]interface{}{
 			"err":    "invalid status",
