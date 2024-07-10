@@ -21,3 +21,9 @@ func (s Status) IsValid() bool {
 
 	return false
 }
+
+type TestTodo struct {
+	Id     int    `json:"id"`
+	Data   string `json:"data"`
+	Status Status `json:"status"`
+}

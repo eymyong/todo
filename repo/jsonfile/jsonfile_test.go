@@ -11,8 +11,110 @@ import (
 )
 
 const fileName = "mock/test_foo.json"
+const fileNameErr = "error.json"
 
-func TestAdd(t *testing.T) {
+func TestReadDecodeErrorFileName(t *testing.T) {
+	expectedErr := "failed to read jsonfile"
+	_, err := readDecode(fileNameErr)
+	if err == nil {
+		t.Errorf("expected error but got nil")
+	}
+
+	// error contain expected error ?
+	if !strings.Contains(err.Error(), expectedErr) {
+		t.Errorf("expected '%s' but got '%s'", expectedErr, err.Error())
+	}
+}
+
+// TODO
+func TestRdadDecodeUnmarshalErr(t *testing.T) {
+	todos, err := readDecode(fileName)
+	if len(todos) != 0 {
+		t.Errorf("expected error but got nil")
+	}
+
+	expectedErr := "failed to unmarshal"
+
+	expectedTodos := []model.TestTodo{
+		{
+			Id:     1,
+			Data:   "kuy",
+			Status: model.StatusTodo,
+		},
+	}
+
+	byteTodos, err := json.Marshal(expectedTodos)
+	if err != nil {
+		t.Errorf("unexpect err: `%s`", err)
+		return
+	}
+
+	err = os.WriteFile(fileName, byteTodos, 0664)
+	if err != nil {
+		t.Errorf("unexpect err: `%s`", err)
+		return
+	}
+
+	_, err = readDecode(fileName)
+	if err == nil {
+		t.Errorf("expected error but got nil")
+	}
+
+	// error contain expected error ?
+	if !strings.Contains(err.Error(), expectedErr) {
+		t.Errorf("expected '%s' but got '%s'", expectedErr, err.Error())
+	}
+
+	err = os.WriteFile(fileName, []byte{}, 0664)
+	if err != nil {
+		t.Errorf("unexpect err: `%s`", err)
+		return
+	}
+
+}
+
+func TestReadDecodeHappy(t *testing.T) {
+	expectedTodos := []model.Todo{
+		{
+			Id:   "2",
+			Data: "kuy",
+		},
+	}
+
+	b, err := json.Marshal(expectedTodos)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err.Error())
+		return
+	}
+
+	err = os.WriteFile(fileName, b, os.ModePerm)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err.Error())
+		return
+	}
+
+	todos, err := readDecode(fileName)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err.Error())
+		return
+	}
+
+	if todos[0].Id != expectedTodos[0].Id {
+		t.Errorf("expected id: '%s' but got '%s'", expectedTodos[0].Id, todos[0].Id)
+	}
+
+	if todos[0].Data != expectedTodos[0].Data {
+		t.Errorf("expected data: '%s' but got '%s'", expectedTodos[0].Id, todos[0].Id)
+	}
+
+	err = os.WriteFile(fileName, []byte{}, os.ModePerm)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err.Error())
+	}
+
+}
+
+func TestAddHappy(t *testing.T) {
 	repo := RepoJsonFile{
 		fileName: fileName,
 	}
@@ -31,6 +133,7 @@ func TestAdd(t *testing.T) {
 	todos, err := readDecode(fileName)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 	if todos[0].Id != expectedTodos.Id {
 		t.Errorf("expected id: '%s' but got '%s'", expectedTodos.Id, todos[0].Id)
@@ -46,10 +149,33 @@ func TestAdd(t *testing.T) {
 	err = os.WriteFile(fileName, []byte{}, os.ModePerm)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 }
 
-func TestUpdateData(t *testing.T) {
+func TestAddFileError(t *testing.T) {
+	repo := RepoJsonFile{
+		fileName: "aaa",
+	}
+	expectedAddErr := "failed to add jsonfile"
+	expectedTodos := model.Todo{
+		Id:     uuid.NewString(),
+		Data:   "yong",
+		Status: model.StatusTodo,
+	}
+
+	err := repo.Add(expectedTodos)
+	if err == nil {
+		t.Errorf("expected error but got nil")
+	}
+
+	// error contain expected error ?
+	if !strings.Contains(err.Error(), expectedAddErr) {
+		t.Errorf("expected '%s' but got '%s'", expectedAddErr, err.Error())
+	}
+}
+
+func TestUpdateDataHappy(t *testing.T) {
 	repo := RepoJsonFile{
 		fileName: fileName,
 	}
@@ -63,11 +189,13 @@ func TestUpdateData(t *testing.T) {
 	b, err := json.Marshal(expectedTodos)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 	err = os.WriteFile(fileName, b, os.ModePerm)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 	newData := "pak"
@@ -75,11 +203,17 @@ func TestUpdateData(t *testing.T) {
 	_, err = repo.UpdateData(expectedTodos[0].Id, newData)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 	todos, err := readDecode(fileName)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
+	}
+
+	if todos[0].Id != expectedTodos[0].Id {
+		t.Errorf("expected id: `%s` but got `%s", expectedTodos[0].Id, todos[0].Id)
 	}
 
 	if newData != todos[0].Data {
@@ -89,11 +223,38 @@ func TestUpdateData(t *testing.T) {
 	err = os.WriteFile(fileName, []byte{}, os.ModePerm)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 }
 
-func TestUpdateStatus(t *testing.T) {
+// TODO
+func TestUpdateDataErr(t *testing.T) {
+	repo := RepoJsonFile{
+		fileName: fileName,
+	}
+	expectedAddErr := "failed to updatedata jsonfile"
+	expectedTodos := model.Todo{
+		Id:     "1",
+		Data:   "yong",
+		Status: model.StatusTodo,
+	}
+	newData := "pak"
+
+	_, err := repo.UpdateData(expectedTodos.Id, newData)
+	if err == nil {
+		t.Errorf("expected error but got nil")
+	}
+
+	// error contain expected error ?
+	if !strings.Contains(err.Error(), expectedAddErr) {
+		t.Errorf("expected '%s' but got '%s'", expectedAddErr, err.Error())
+	}
+
+}
+
+// TODO
+func TestUpdateStatusHappy(t *testing.T) {
 	repo := RepoJsonFile{
 		fileName: fileName,
 	}
@@ -137,7 +298,11 @@ func TestUpdateStatus(t *testing.T) {
 
 }
 
-func TestDelete(t *testing.T) {
+func TestUpdateStatusErr(t *testing.T) {
+
+}
+
+func TestDeleteHappy(t *testing.T) {
 	repo := RepoJsonFile{
 		fileName: fileName,
 	}
@@ -163,100 +328,47 @@ func TestDelete(t *testing.T) {
 	b, err := json.Marshal(expectedTodos)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 	err = os.WriteFile(fileName, b, os.ModePerm)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 	_, err = repo.Remove(expectedTodos[1].Id)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 	todos, err := readDecode(fileName)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
+	}
+
+	if len(todos) != len(expectedTodos)-1 {
+		t.Errorf("unexpected length todos != '%v'", len(expectedTodos)-1)
+		return
 	}
 
 	for _, v := range todos {
 		if v.Id == expectedTodos[1].Id {
-			t.Errorf("unexpected id: '%s' but got '%s'", expectedTodos[1].Id, v.Id)
+			t.Errorf("unexpected id: '%s'", v.Id)
 		}
 	}
 
 	err = os.WriteFile(fileName, []byte{}, os.ModePerm)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
+		return
 	}
 
 }
-func TestReadDecodeErrorFileName(t *testing.T) {
-	expectedErr := "failed to read jsonfile"
-	_, err := readDecode("error.json")
-	if err == nil {
-		t.Errorf("expected error but got nil")
-	}
 
-	// error contain expected error ?
-	if !strings.Contains(err.Error(), expectedErr) {
-		t.Errorf("expected '%s' but got '%s'", expectedErr, err.Error())
-	}
-}
-
-func TestReadDecodeErrorUnmarshal(t *testing.T) {
-	expectedErr := "unexpected end of JSON input"
-	_, err := readDecode("mock/test_foo_unmarshal_err.json")
-	if err == nil {
-		t.Errorf("expected error but got nil")
-		return
-	}
-
-	// error contain expected error ?
-	if !strings.Contains(err.Error(), expectedErr) {
-		t.Errorf("expected '%s' but got '%s'", expectedErr, err.Error())
-	}
-}
-
-func TestReadDecodeHappy(t *testing.T) {
-	expectedTodos := []model.Todo{
-		{
-			Id:   "2",
-			Data: "kuy",
-		},
-	}
-
-	b, err := json.Marshal(expectedTodos)
-	if err != nil {
-		t.Errorf("unexpected err: %s", err.Error())
-		return
-	}
-
-	err = os.WriteFile(fileName, b, os.ModePerm)
-	if err != nil {
-		t.Errorf("unexpected err: %s", err.Error())
-		return
-	}
-
-	todos, err := readDecode(fileName)
-	if err != nil {
-		t.Errorf("unexpected err: %s", err.Error())
-		return
-	}
-
-	if todos[0].Id != expectedTodos[0].Id {
-		t.Errorf("expected id: '%s' but got '%s'", expectedTodos[0].Id, todos[0].Id)
-	}
-
-	if todos[0].Data != expectedTodos[0].Data {
-		t.Errorf("expected data: '%s' but got '%s'", expectedTodos[0].Id, todos[0].Id)
-	}
-
-	err = os.WriteFile(fileName, []byte{}, os.ModePerm)
-	if err != nil {
-		t.Errorf("unexpected err: %s", err.Error())
-	}
+func TestDeleteErr(t *testing.T) {
 
 }
 
@@ -301,17 +413,13 @@ func TestGetAll(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
 	}
-
-	// จริงๆสามารถใช้ TestReadDecodeHappy ได้เลยรึป่าว
-	// TestReadDecodeHappy(t)
-
 }
 
 func TestGetByID(t *testing.T) {
 	repo := RepoJsonFile{
 		fileName: fileName,
 	}
-	// ไม่จำเป็นต้องเป็น []รึป่าว
+
 	expectedTodos := []model.Todo{
 		{
 			Id:   "2",

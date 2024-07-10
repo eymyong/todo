@@ -36,21 +36,18 @@ func readDecode(fname string) ([]model.Todo, error) {
 func (j *RepoJsonFile) Add(todo model.Todo) error {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
-		return err
-		//return fmt.Errorf("failed to readDecode jsonfile: %w", err)
+		return fmt.Errorf("failed to add jsonfile: %w", err)
 	}
 
 	todoList = append(todoList, todo)
-	out, err := json.Marshal(todoList)
+	byteTodoList, err := json.Marshal(todoList)
 	if err != nil {
-		return fmt.Errorf("failed to marshal: %w", err)
-		//panic(err)
+		return fmt.Errorf("failed to add marshal: %w", err)
 	}
 
-	err = os.WriteFile(j.fileName, out, 0664)
+	err = os.WriteFile(j.fileName, byteTodoList, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("failed to marshal: %w", err)
-		//panic(err)
+		return fmt.Errorf("failed to add writefile: %w", err)
 	}
 
 	return nil
@@ -78,7 +75,7 @@ func (j *RepoJsonFile) Get(id string) (model.Todo, error) {
 func (j *RepoJsonFile) GetStatus(status model.Status) ([]model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
-		return []model.Todo{}, fmt.Errorf("failed to get jsonfile: %w", err)
+		return []model.Todo{}, fmt.Errorf("failed to get-status jsonfile: %w", err)
 	}
 
 	var statusTodoList []model.Todo
@@ -112,12 +109,12 @@ func (j *RepoJsonFile) UpdateData(id string, newdata string) (model.Todo, error)
 
 	todoByte, err := json.Marshal(newTodoLists)
 	if err != nil {
-		return model.Todo{}, fmt.Errorf("failed to marshal jsonfile: %w", err)
+		return model.Todo{}, fmt.Errorf("failed to updatedata marshal: %w", err)
 	}
 
 	err = os.WriteFile(j.fileName, todoByte, 0664)
 	if err != nil {
-		return model.Todo{}, fmt.Errorf("failed to writefile jsonfile: %w", err)
+		return model.Todo{}, fmt.Errorf("failed to updatedata writefile: %w", err)
 	}
 
 	return old, nil
@@ -146,11 +143,11 @@ func (j *RepoJsonFile) UpdateStatus(id string, status model.Status) (model.Todo,
 
 	todosByte, err := json.Marshal(todos)
 	if err != nil {
-		return model.Todo{}, fmt.Errorf("failed to marshal jsonfile: %w", err)
+		return model.Todo{}, fmt.Errorf("failed to update-status marshal: %w", err)
 	}
 	err = os.WriteFile(j.fileName, todosByte, 0664)
 	if err != nil {
-		return model.Todo{}, fmt.Errorf("failed to writefile: %w", err)
+		return model.Todo{}, fmt.Errorf("failed to update-statu writefile: %w", err)
 	}
 
 	return *old, nil
@@ -159,7 +156,7 @@ func (j *RepoJsonFile) UpdateStatus(id string, status model.Status) (model.Todo,
 func (j *RepoJsonFile) Remove(id string) (model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
-		return model.Todo{}, fmt.Errorf("failed to unmarshal jsonfile: %w", err)
+		return model.Todo{}, fmt.Errorf("failed to Remove: %w", err)
 	}
 
 	newTodoList := []model.Todo{}
@@ -177,7 +174,7 @@ func (j *RepoJsonFile) Remove(id string) (model.Todo, error) {
 		return model.Todo{}, err
 	}
 
-	err = os.WriteFile(j.fileName, todoBytes, 0664)
+	err = os.WriteFile(j.fileName, todoBytes, os.ModePerm)
 	if err != nil {
 		return model.Todo{}, err
 	}
