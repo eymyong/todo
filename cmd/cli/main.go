@@ -50,9 +50,11 @@ type job struct {
 	mode   Mode
 }
 
-const JsonFile = "json"
-const JsonMap = "jsonmap"
-const TextFile = "text"
+const (
+	JsonFile = "json"
+	JsonMap  = "jsonmap"
+	TextFile = "text"
+)
 
 func initRepo() repo.Repository {
 	envRepo := os.Getenv("REPO")
@@ -104,7 +106,6 @@ func initRepo() repo.Repository {
 	// }
 
 	// return repo
-
 }
 
 func main() {
@@ -179,7 +180,6 @@ func main() {
 		fmt.Println("Incorrect Mode")
 		return
 	}
-
 }
 
 func parse(args []string) (job, error) {
@@ -211,7 +211,7 @@ func parse(args []string) (job, error) {
 		}
 		//
 		if args[1] == "get-status" {
-			return job{mode: ModeGetStatus, status: model.Status(args[2])}, nil
+			return job{mode: ModeGetStatus, status: model.StatusTodo}, nil
 		}
 		if args[1] == "--rm" {
 			return job{mode: ModeRemove, id: args[2]}, nil
@@ -230,11 +230,9 @@ func parse(args []string) (job, error) {
 		if args[1] == "--update" {
 			return job{mode: ModeUpdate, id: args[2], data: args[3]}, nil
 		}
-
 	}
 
 	return job{}, errors.New("input incorrect")
-
 }
 
 func methodUpdate(r repo.Repository, id string, newdata string) (model.Todo, error) {
@@ -256,7 +254,6 @@ func methodRm(r repo.Repository, id string) (model.Todo, error) {
 }
 
 func methodAdd(r repo.Repository, data string) error {
-
 	err := r.Add(model.Todo{
 		Id:   uuid.NewString(),
 		Data: data,

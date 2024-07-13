@@ -29,7 +29,7 @@ func (j *RepoTextFile) Add(todo model.Todo) error {
 	todosList = append(todosList, todo)
 	todosStr := modelToLines(todosList)
 
-	err = os.WriteFile(j.fileName, []byte(todosStr), 0664)
+	err = os.WriteFile(j.fileName, []byte(todosStr), 0o664)
 	if err != nil {
 		return err
 	}
@@ -96,18 +96,12 @@ func lineToModel(line string) (model.Todo, error) {
 		return model.Todo{}, fmt.Errorf("not data")
 	}
 
-	status := model.StatusTodo
-
-	if len(parts) >= 3 {
-		status = model.Status(parts[2])
-	}
-
 	todo := model.Todo{
 		Id:     parts[0],
 		Data:   parts[1],
-		Status: status,
+		Status: model.Status(parts[2]),
 	}
-
+	//
 	if todo.Status == "" {
 		todo.Status = model.StatusTodo
 	}
@@ -183,6 +177,7 @@ func (j *RepoTextFile) UpdateData(id string, newdata string) (model.Todo, error)
 func (j *RepoTextFile) UpdateStatus(id string, status model.Status) (model.Todo, error) {
 	return model.Todo{}, nil
 }
+
 func (j *RepoTextFile) Remove(id string) (model.Todo, error) {
 	return model.Todo{}, nil
 }
