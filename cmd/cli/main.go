@@ -9,34 +9,45 @@ import (
 	"github.com/eymyong/todo/repo"
 	"github.com/eymyong/todo/repo/jsonfile"
 	"github.com/eymyong/todo/repo/jsonfilemap"
+	"github.com/eymyong/todo/repo/textfile"
 	"github.com/google/uuid"
 )
 
-//git remote origin https://github.com/eymyong/todo.git
-// git add -A
-// git commit -m "homework"
-// git push origin main
+/*
+git remote origin https://github.com/eymyong/todo.git
+git add -A
+git commit -m "homework"
+git push origin
+
+*/
+
 /*
 [main.exe --add "kuyhee"]   ==> {"id": 2, "text": "kuyhee"}
 main.exe --get 2          ==> {"id": 2, "text": "kuyhee"}
 main.exe --rm 2
 main.exe --update  2 "heekuy"  ==> {"id": 2, "text": "heekuy"}
 main.exe                  ==> []
+
+$Env:REPO = "text"
+$Env:FILENAME = ""
 */
 type Mode string
 
 const (
-	ModeAdd    Mode = "--add"
-	ModeGetAll Mode = "--get-all"
-	ModeGet    Mode = "--get"
-	ModeUpdate Mode = "--update"
-	ModeRemove Mode = "--rm"
+	ModeAdd          Mode = "--add"
+	ModeGetAll       Mode = "--get-all"
+	ModeGet          Mode = "--get"
+	ModeGetStatus    Mode = "--get-status"
+	ModeUpdate       Mode = "--update"
+	ModeUpdateStatus Mode = "--update-status"
+	ModeRemove       Mode = "--rm"
 )
 
 type job struct {
-	id   string
-	data string
-	mode Mode
+	id     string
+	data   string
+	status model.Status
+	mode   Mode
 }
 
 const JsonFile = "json"
@@ -48,6 +59,7 @@ func initRepo() repo.Repository {
 	envFile := os.Getenv("FILENAME")
 
 	var repo repo.Repository
+
 	switch envRepo {
 	case JsonMap:
 		if envFile == "" {
@@ -56,8 +68,12 @@ func initRepo() repo.Repository {
 
 		repo = jsonfilemap.New(envFile)
 
-	case JsonFile:
-		fallthrough
+	case TextFile:
+		if envFile == "" {
+			envFile = "todo.text"
+		}
+
+		repo = textfile.New(envFile)
 
 	default:
 		if envFile == "" {
@@ -68,6 +84,27 @@ func initRepo() repo.Repository {
 	}
 
 	return repo
+	// switch envRepo {
+	// case JsonMap:
+	// 	if envFile == "" {
+	// 		envFile = "todo.map.json"
+	// 	}
+
+	// 	repo = jsonfilemap.New(envFile)
+
+	// case JsonFile:
+	// 	fallthrough
+
+	// default:
+	// 	if envFile == "" {
+	// 		envFile = "todo.json"
+	// 	}
+
+	// 	repo = jsonfile.New(envFile)
+	// }
+
+	// return repo
+
 }
 
 func main() {
@@ -86,7 +123,7 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println("ok")
+		fmt.Println("Succeed")
 		return
 	case ModeGetAll:
 		todoList, err := methodGetAll(repo)
@@ -109,8 +146,10 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Printf("Get to ID: %s\nData: %s\n", data.Id, data.Data)
+		fmt.Printf("Get to ID: %s\nData: %s\nStatus: %s", data.Id, data.Data, data.Status)
 		return
+
+	case ModeGetStatus:
 
 	case ModeUpdate:
 		old, err := methodUpdate(repo, job.id, job.data)
@@ -126,6 +165,8 @@ func main() {
 		fmt.Printf("Old todo ID: %s, data: %s\n", old.Id, old.Data)
 		fmt.Printf("New todo ID: %s, data: %s\n", new.Id, new.Data)
 		return
+
+	case ModeUpdateStatus:
 
 	case ModeRemove:
 		data, err := methodRm(repo, job.id)
@@ -166,10 +207,11 @@ func parse(args []string) (job, error) {
 			return job{mode: ModeAdd, data: args[2]}, nil
 		}
 		if args[1] == "--get" {
-			if args[2] == "all" {
-				return job{mode: ModeGetAll, id: args[2]}, nil
-			}
 			return job{mode: ModeGet, id: args[2]}, nil
+		}
+		//
+		if args[1] == "get-status" {
+			return job{mode: ModeGetStatus, status: model.StatusTodo}, nil
 		}
 		if args[1] == "--rm" {
 			return job{mode: ModeRemove, id: args[2]}, nil
@@ -182,9 +224,13 @@ func parse(args []string) (job, error) {
 	}
 
 	if len(args) == 4 {
+		// if args[1] == "--update-status" {
+		// 	return job{mode: ModeUpdate, id: args[2], data: args[3]}, nil
+		// }
 		if args[1] == "--update" {
 			return job{mode: ModeUpdate, id: args[2], data: args[3]}, nil
 		}
+
 	}
 
 	return job{}, errors.New("input incorrect")
@@ -233,6 +279,15 @@ func methodGet(r repo.Repository, id string) (model.Todo, error) {
 	todo, err := r.Get(id)
 	if err != nil {
 		return model.Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func methodGetStatus(r repo.Repository, status model.Status) ([]model.Todo, error) {
+	todo, err := r.GetStatus(model.StatusDone)
+	if err != nil {
+		return []model.Todo{}, err
 	}
 
 	return todo, nil
