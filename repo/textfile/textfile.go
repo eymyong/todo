@@ -9,36 +9,72 @@ import (
 	"github.com/eymyong/todo/repo"
 )
 
+/*
+	data
+
+1: one
+2: two
+3: three
+*/
 type RepoTextFile struct {
 	fileName string
 }
 
 func (j *RepoTextFile) Add(todo model.Todo) error {
-	panic("not implemented")
+	todosList, err := readDecode(j.fileName)
+	if err != nil {
+		return err
+	}
+
+	todosList = append(todosList, todo)
+	todosStr := modelToLines(todosList)
+
+	err = os.WriteFile(j.fileName, []byte(todosStr), 0664)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (j *RepoTextFile) GetAll() ([]model.Todo, error) {
-	panic("not implemented")
+	todosList, err := readDecode(j.fileName)
+	if err != nil {
+		return []model.Todo{}, err
+	}
+	return todosList, nil
 }
 
 func (j *RepoTextFile) Get(id string) (model.Todo, error) {
-	panic("not implemented")
-}
+	todosList, err := readDecode(j.fileName)
+	if err != nil {
+		return model.Todo{}, err
+	}
 
-func (j *RepoTextFile) GetStatus(status model.Status) ([]model.Todo, error) {
-	panic("not implemented")
-}
-
-func (j *RepoTextFile) UpdateData(id string, newdata string) (model.Todo, error) {
-	panic("not implemented")
-}
-
-func (j *RepoTextFile) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+	for _, v := range todosList {
+		if id == v.Id {
+			fmt.Println(v)
+			return v, nil
+		}
+	}
 
 	return model.Todo{}, nil
 }
-func (j *RepoTextFile) Remove(id string) (model.Todo, error) {
-	panic("not implemented")
+
+func (j *RepoTextFile) GetStatus(status model.Status) ([]model.Todo, error) {
+	todosList, err := readDecode(j.fileName)
+	if err != nil {
+		return []model.Todo{}, err
+	}
+
+	newTodoList := []model.Todo{}
+	for _, v := range todosList {
+		if status == v.Status {
+			newTodoList = append(newTodoList, v)
+		}
+	}
+
+	return newTodoList, nil
 }
 
 func New(fileName string) repo.Repository {
@@ -60,10 +96,17 @@ func lineToModel(line string) (model.Todo, error) {
 		return model.Todo{}, fmt.Errorf("not data")
 	}
 
-	return model.Todo{
-		Id:   parts[0],
-		Data: parts[1],
-	}, nil
+	todo := model.Todo{
+		Id:     parts[0],
+		Data:   parts[1],
+		Status: model.Status(parts[2]),
+	}
+	//
+	if todo.Status == "" {
+		todo.Status = model.StatusTodo
+	}
+
+	return todo, nil
 }
 
 func linesToModel(data string) ([]model.Todo, error) {
@@ -88,6 +131,10 @@ func readDecode(fname string) ([]model.Todo, error) {
 		return nil, err
 	}
 
+	if len(b) == 0 {
+		return []model.Todo{}, nil
+	}
+
 	s := string(b)
 	s = strings.ReplaceAll(s, "\r\n", "\n")
 
@@ -95,7 +142,7 @@ func readDecode(fname string) ([]model.Todo, error) {
 }
 
 func modelToLine(t model.Todo) string {
-	return fmt.Sprintf("%s: %s", t.Id, t.Data)
+	return fmt.Sprintf("%s: %s: %s", t.Id, t.Data, t.Status)
 }
 
 func modelToLines(todos []model.Todo) string {
@@ -121,4 +168,31 @@ func modelToLinesJoin(todos []model.Todo) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func (j *RepoTextFile) UpdateData(id string, newdata string) (model.Todo, error) {
+	return model.Todo{}, nil
+}
+
+func (j *RepoTextFile) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+	return model.Todo{}, nil
+}
+func (j *RepoTextFile) Remove(id string) (model.Todo, error) {
+	return model.Todo{}, nil
+}
+
+func makeTodos() []model.Todo {
+	newTodos := []model.Todo{
+		{
+			Id:     "1",
+			Data:   "one",
+			Status: model.StatusTodo,
+		},
+		{
+			Id:     "2",
+			Data:   "two",
+			Status: model.StatusDone,
+		},
+	}
+	return newTodos
 }

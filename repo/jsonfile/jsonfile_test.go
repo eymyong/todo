@@ -9,6 +9,10 @@ import (
 	"github.com/eymyong/todo/model"
 )
 
+/*
+go test
+go test -v
+*/
 const fileName = "mock/test_foo.json"
 const fileNameErr = "error.json"
 
