@@ -96,12 +96,18 @@ func lineToModel(line string) (model.Todo, error) {
 		return model.Todo{}, fmt.Errorf("not data")
 	}
 
+	status := model.StatusTodo
+
+	if len(parts) >= 3 {
+		status = model.Status(parts[2])
+	}
+
 	todo := model.Todo{
 		Id:     parts[0],
 		Data:   parts[1],
-		Status: model.Status(parts[2]),
+		Status: status,
 	}
-	//
+
 	if todo.Status == "" {
 		todo.Status = model.StatusTodo
 	}

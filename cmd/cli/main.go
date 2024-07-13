@@ -211,7 +211,7 @@ func parse(args []string) (job, error) {
 		}
 		//
 		if args[1] == "get-status" {
-			return job{mode: ModeGetStatus, status: model.StatusTodo}, nil
+			return job{mode: ModeGetStatus, status: model.Status(args[2])}, nil
 		}
 		if args[1] == "--rm" {
 			return job{mode: ModeRemove, id: args[2]}, nil
