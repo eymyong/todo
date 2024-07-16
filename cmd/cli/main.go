@@ -22,20 +22,10 @@ git push origin
 */
 
 /*
-[main.exe --add "kuyhee"]   ==> {"id": 2, "text": "kuyhee"}
-main.exe --get 2          ==> {"id": 2, "text": "kuyhee"}
-main.exe --rm 2
-main.exe --update  2 "heekuy"  ==> {"id": 2, "text": "heekuy"}
-main.exe                  ==> []
-
 $Env:REPO = "text"
 $Env:FILENAME = ""
 */
-/*
-1f17567b-f733-4e2f-b7ef-4b4e9af6caa8: one: TODO
-17aac420-1f99-4f05-844b-b77cc24f1244: two: TODO
-74a398bb-7148-428b-b912-f9b4ad571bde: three: TODO
-*/
+
 type Mode string
 
 const (
