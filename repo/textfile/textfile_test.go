@@ -138,46 +138,6 @@ func TestLineToModel_Happy(t *testing.T) {
 	}
 }
 
-func TestGetStatus(t *testing.T) {
-	lines := `1: one: DONE
-2: eiei: TODO
-3: hahaha
-5: asdfk:`
-
-	expectedsTODO := []model.Todo{
-		{
-			Id:     "2",
-			Data:   "eiei",
-			Status: model.StatusTodo,
-		},
-		{
-			Id:     "3",
-			Data:   "hahaha",
-			Status: model.StatusTodo,
-		},
-		{
-			Id:     "5",
-			Data:   "asdfk",
-			Status: model.StatusTodo,
-		},
-	}
-
-	err := os.WriteFile(fileName, []byte(lines), 0664)
-	if err != nil {
-		t.Error("unexpected error", err)
-	}
-
-	repo := RepoTextFile{fileName: fileName}
-	actuals, err := repo.GetStatus(model.StatusTodo)
-	if err != nil {
-		t.Error("unexpected error", err)
-	}
-
-	if len(actuals) != len(expectedsTODO) {
-		t.Errorf("unexpected length, expecting=%d, actual=%d", len(actuals), len(expectedsTODO))
-	}
-}
-
 func TestLinesToModel_Happy(t *testing.T) {
 	lines := "1: one: TODO\n2: two: DONE\n3: three: TODO"
 	expecteds := []model.Todo{
@@ -215,5 +175,45 @@ func TestLinesToModel_Happy(t *testing.T) {
 		if actual != expected {
 			t.Errorf("unexpected value, expecting='%+v', got='%+v'", expected, actual)
 		}
+	}
+}
+
+func TestGetStatus(t *testing.T) {
+	lines := `1: one: DONE
+2: eiei: TODO
+3: hahaha
+5: asdfk:`
+
+	expectedsTODO := []model.Todo{
+		{
+			Id:     "2",
+			Data:   "eiei",
+			Status: model.StatusTodo,
+		},
+		{
+			Id:     "3",
+			Data:   "hahaha",
+			Status: model.StatusTodo,
+		},
+		{
+			Id:     "5",
+			Data:   "asdfk",
+			Status: model.StatusTodo,
+		},
+	}
+
+	err := os.WriteFile(fileName, []byte(lines), 0664)
+	if err != nil {
+		t.Error("unexpected error", err)
+	}
+
+	repo := RepoTextFile{fileName: fileName}
+	actuals, err := repo.GetStatus(model.StatusTodo)
+	if err != nil {
+		t.Error("unexpected error", err)
+	}
+
+	if len(actuals) != len(expectedsTODO) {
+		t.Errorf("unexpected length, expecting=%d, actual=%d", len(actuals), len(expectedsTODO))
 	}
 }
