@@ -162,7 +162,7 @@ func TestGetStatus(t *testing.T) {
 		},
 	}
 
-	err := os.WriteFile(fileName, []byte(lines), 0664)
+	err := os.WriteFile(fileName, []byte(lines), 0o664)
 	if err != nil {
 		t.Error("unexpected error", err)
 	}
