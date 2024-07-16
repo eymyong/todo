@@ -22,12 +22,6 @@ git push origin
 */
 
 /*
-[main.exe --add "kuyhee"]   ==> {"id": 2, "text": "kuyhee"}
-main.exe --get 2          ==> {"id": 2, "text": "kuyhee"}
-main.exe --rm 2
-main.exe --update  2 "heekuy"  ==> {"id": 2, "text": "heekuy"}
-main.exe                  ==> []
-
 $Env:REPO = "text"
 $Env:FILENAME = ""
 */
