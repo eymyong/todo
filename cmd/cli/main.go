@@ -25,14 +25,15 @@ git push origin
 $Env:REPO = "text"
 $Env:FILENAME = ""
 */
+
 type Mode string
 
 const (
 	ModeAdd          Mode = "--add"
 	ModeGetAll       Mode = "--get-all"
-	ModeGet          Mode = "--get"
-	ModeGetStatus    Mode = "--get-status"
-	ModeUpdate       Mode = "--update"
+	ModeGetById      Mode = "--get"
+	ModeGetByStatus  Mode = "--get-status"
+	ModeUpdateData   Mode = "--update"
 	ModeUpdateStatus Mode = "--update-status"
 	ModeRemove       Mode = "--rm"
 )
@@ -44,11 +45,9 @@ type job struct {
 	mode   Mode
 }
 
-const (
-	JsonFile = "json"
-	JsonMap  = "jsonmap"
-	TextFile = "text"
-)
+const JsonFile = "json"
+const JsonMap = "jsonmap"
+const TextFile = "text"
 
 func initRepo() repo.Repository {
 	envRepo := os.Getenv("REPO")
@@ -80,26 +79,6 @@ func initRepo() repo.Repository {
 	}
 
 	return repo
-	// switch envRepo {
-	// case JsonMap:
-	// 	if envFile == "" {
-	// 		envFile = "todo.map.json"
-	// 	}
-
-	// 	repo = jsonfilemap.New(envFile)
-
-	// case JsonFile:
-	// 	fallthrough
-
-	// default:
-	// 	if envFile == "" {
-	// 		envFile = "todo.json"
-	// 	}
-
-	// 	repo = jsonfile.New(envFile)
-	// }
-
-	// return repo
 }
 
 func main() {
@@ -136,44 +115,79 @@ func main() {
 			fmt.Println(todo)
 		}
 
-	case ModeGet:
-		data, err := methodGet(repo, job.id)
+	case ModeGetById:
+		data, err := methodGetById(repo, job.id)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
+
 		fmt.Printf("Get to ID: %s\nData: %s\nStatus: %s", data.Id, data.Data, data.Status)
 		return
 
-	case ModeGetStatus:
-
-	case ModeUpdate:
-		old, err := methodUpdate(repo, job.id, job.data)
+	case ModeGetByStatus:
+		todos, err := methodGetByStatus(repo, job.status)
 		if err != nil {
 			fmt.Println(err)
+			return
+		}
+
+		if len(todos) == 0 {
+			fmt.Printf("Not found data to staus: %s", job.status)
+			return
+		}
+
+		fmt.Printf("status: `%s`\n%s", job.status, todos)
+		return
+
+	case ModeUpdateData:
+		old, err := methodUpdateData(repo, job.id, job.data)
+		if err != nil {
+			fmt.Println(err)
+			return
+
 		}
 
 		new := model.Todo{
 			Id:   job.id,
 			Data: job.data,
 		}
-
+		fmt.Println("Succeed")
 		fmt.Printf("Old todo ID: %s, data: %s\n", old.Id, old.Data)
 		fmt.Printf("New todo ID: %s, data: %s\n", new.Id, new.Data)
 		return
 
 	case ModeUpdateStatus:
-
-	case ModeRemove:
-		data, err := methodRm(repo, job.id)
+		old, err := methodUpdateStatus(repo, job.id, job.status)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
-		fmt.Printf("Remove to ID: %s\nData: %s", data.Id, data.Data)
+
+		new := model.Todo{
+			Id:     job.id,
+			Status: job.status,
+		}
+		fmt.Println("Succeed")
+		fmt.Printf("Old status ID: %s, status: %s\n", old.Id, old.Status)
+		fmt.Printf("New status ID: %s, status: %s\n", new.Id, new.Status)
 		return
+
+	case ModeRemove:
+		data, err := methodRemove(repo, job.id)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("Succeed")
+		fmt.Printf("Remove to ID: %s\ntodo: %s", data.Id, data)
+		return
+
 	default:
 		fmt.Println("Incorrect Mode")
 		return
 	}
+
 }
 
 func parse(args []string) (job, error) {
@@ -185,12 +199,19 @@ func parse(args []string) (job, error) {
 		if args[1] == "--add" {
 			return job{}, errors.New("there is no information to add")
 		}
+
 		if args[1] == "--get" {
 			return job{}, errors.New("there is no information to get")
 		}
+
+		if args[1] == "--get-status" {
+			return job{}, errors.New("there is no information to get-status")
+		}
+
 		if args[1] == "--update" {
 			return job{}, errors.New("there is no information to update")
 		}
+
 		if args[1] == "--rm" {
 			return job{}, errors.New("there is no information to rm")
 		}
@@ -201,56 +222,47 @@ func parse(args []string) (job, error) {
 			return job{mode: ModeAdd, data: args[2]}, nil
 		}
 		if args[1] == "--get" {
-			return job{mode: ModeGet, id: args[2]}, nil
+			return job{mode: ModeGetById, id: args[2]}, nil
 		}
-		//
-		if args[1] == "get-status" {
-			return job{mode: ModeGetStatus, status: model.Status(args[2])}, nil
+
+		if args[1] == "--get-status" {
+			return job{mode: ModeGetByStatus, status: model.Status(args[2])}, nil
 		}
+
+		if args[1] == "--update" {
+			return job{}, errors.New("Not data to update-data")
+		}
+
+		if args[1] == "--update-status" {
+			return job{}, errors.New("Not data to update-status")
+		}
+
 		if args[1] == "--rm" {
 			return job{mode: ModeRemove, id: args[2]}, nil
-		}
-		if args[1] == "--update" {
-			fmt.Println("Not data to update")
-			return job{}, nil
 		}
 
 	}
 
 	if len(args) == 4 {
-		// if args[1] == "--update-status" {
-		// 	return job{mode: ModeUpdate, id: args[2], data: args[3]}, nil
-		// }
 		if args[1] == "--update" {
-			return job{mode: ModeUpdate, id: args[2], data: args[3]}, nil
+			return job{mode: ModeUpdateData, id: args[2], data: args[3]}, nil
+		}
+
+		if args[1] == "--update-status" {
+			return job{mode: ModeUpdateStatus, id: args[2], status: model.Status(args[3])}, nil
 		}
 	}
 
 	return job{}, errors.New("input incorrect")
-}
 
-func methodUpdate(r repo.Repository, id string, newdata string) (model.Todo, error) {
-	todo, err := r.UpdateData(id, newdata)
-	if err != nil {
-		return model.Todo{}, err
-	}
-
-	return todo, nil
-}
-
-func methodRm(r repo.Repository, id string) (model.Todo, error) {
-	todo, err := r.Remove(id)
-	if err != nil {
-		return model.Todo{}, err
-	}
-
-	return todo, nil
 }
 
 func methodAdd(r repo.Repository, data string) error {
+
 	err := r.Add(model.Todo{
-		Id:   uuid.NewString(),
-		Data: data,
+		Id:     uuid.NewString(),
+		Data:   data,
+		Status: model.StatusTodo,
 	})
 	if err != nil {
 		return err
@@ -266,7 +278,7 @@ func methodGetAll(r repo.Repository) ([]model.Todo, error) {
 	return todoList, nil
 }
 
-func methodGet(r repo.Repository, id string) (model.Todo, error) {
+func methodGetById(r repo.Repository, id string) (model.Todo, error) {
 	todo, err := r.Get(id)
 	if err != nil {
 		return model.Todo{}, err
@@ -275,10 +287,37 @@ func methodGet(r repo.Repository, id string) (model.Todo, error) {
 	return todo, nil
 }
 
-func methodGetStatus(r repo.Repository, status model.Status) ([]model.Todo, error) {
-	todo, err := r.GetStatus(model.StatusDone)
+func methodGetByStatus(r repo.Repository, status model.Status) ([]model.Todo, error) {
+	todo, err := r.GetStatus(status)
 	if err != nil {
 		return []model.Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func methodUpdateData(r repo.Repository, id string, newdata string) (model.Todo, error) {
+	todo, err := r.UpdateData(id, newdata)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func methodUpdateStatus(r repo.Repository, id string, status model.Status) (model.Todo, error) {
+	todo, err := r.UpdateStatus(id, status)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func methodRemove(r repo.Repository, id string) (model.Todo, error) {
+	todo, err := r.Remove(id)
+	if err != nil {
+		return model.Todo{}, err
 	}
 
 	return todo, nil
