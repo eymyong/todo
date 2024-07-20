@@ -137,7 +137,11 @@ func main() {
 			return
 		}
 
-		fmt.Printf("status: `%s`\n%s", job.status, todos)
+		fmt.Printf("Status: `%s`\n", job.status)
+		for _, todo := range todos {
+			fmt.Println(todo)
+		}
+
 		return
 
 	case ModeUpdateData:
