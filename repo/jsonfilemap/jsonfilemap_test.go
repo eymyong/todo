@@ -130,7 +130,7 @@ func TestWriteEncode_Happy(t *testing.T) {
 			Status: model.StatusTodo,
 		},
 		{
-			Id:     "1",
+			Id:     "3",
 			Data:   "three",
 			Status: model.StatusTodo,
 		},
@@ -140,6 +140,11 @@ func TestWriteEncode_Happy(t *testing.T) {
 		value := todos[i]
 		key := value.Id
 		expectedTodosMap[key] = value
+	}
+
+	if len(expectedTodosMap) != len(todos) {
+		t.Errorf("expect length expectedTodosMap: `%d` but got length todos: `%d`", len(expectedTodosMap), len(todos))
+		return
 	}
 
 	err := writeEncode(fileName, expectedTodosMap)
@@ -155,7 +160,7 @@ func TestWriteEncode_Happy(t *testing.T) {
 	}
 
 	if len(expectedTodosMap) != len(todosMap) {
-		t.Errorf("unexpected length expectedTodosMap != length todosMap")
+		t.Errorf("expect length expectedTodosMap: `%d` but got length todosMap: `%d`", len(expectedTodosMap), len(todosMap))
 		return
 	}
 

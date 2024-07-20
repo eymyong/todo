@@ -63,9 +63,12 @@ func (j *RepoJsonFileMap) GetAll() ([]model.Todo, error) {
 		return []model.Todo{}, err
 	}
 
-	todoList := []model.Todo{}
+	todoList := make([]model.Todo, len(todoMap))
+
+	i := 0
 	for _, todo := range todoMap {
-		todoList = append(todoList, todo)
+		todoList[i] = todo
+		i++
 	}
 
 	return todoList, nil
@@ -97,7 +100,7 @@ func (j *RepoJsonFileMap) GetStatus(status model.Status) ([]model.Todo, error) {
 	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
 
 	checkStatus := status.IsValid()
-	if checkStatus != true {
+	if !checkStatus {
 		return []model.Todo{}, fmt.Errorf("bad status: `%s`", status)
 	}
 
@@ -112,7 +115,7 @@ func (j *RepoJsonFileMap) GetStatus(status model.Status) ([]model.Todo, error) {
 	return newTodos, nil
 }
 
-func (j *RepoJsonFileMap) UpdateData(id string, newdata string) (model.Todo, error) {
+func (j *RepoJsonFileMap) UpdateData(id string, newData string) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -125,7 +128,9 @@ func (j *RepoJsonFileMap) UpdateData(id string, newdata string) (model.Todo, err
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
 	}
 
-	todoMap[id] = model.Todo{Id: id, Data: newdata, Status: todoMap[id].Status}
+	copy := old
+	copy.Data = newData
+	todoMap[id] = copy
 
 	err = writeEncode(j.fileName, todoMap)
 	if err != nil {
@@ -135,7 +140,7 @@ func (j *RepoJsonFileMap) UpdateData(id string, newdata string) (model.Todo, err
 	return old, nil
 }
 
-func (j *RepoJsonFileMap) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+func (j *RepoJsonFileMap) UpdateStatus(id string, newStatus model.Status) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -148,7 +153,9 @@ func (j *RepoJsonFileMap) UpdateStatus(id string, status model.Status) (model.To
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
 	}
 
-	todoMap[id] = model.Todo{Id: id, Data: todoMap[id].Data, Status: status}
+	copy := old
+	copy.Status = newStatus
+	todoMap[id] = copy
 
 	err = writeEncode(j.fileName, todoMap)
 	if err != nil {
