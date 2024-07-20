@@ -59,7 +59,7 @@ func TestReadDecodeHappy(t *testing.T) {
 }
 
 // ถ้ามี file "error.json" อยู่แล้ว จะError ต้องมาทำให้ถูก
-func TestReadDecodeErrorFileName(t *testing.T) {
+func TestReadDecodeFileName_Err(t *testing.T) {
 	expectedErr := "failed to read jsonfile"
 	_, err := readDecode("expected err")
 	if err != nil {
@@ -72,7 +72,7 @@ func TestReadDecodeErrorFileName(t *testing.T) {
 	}
 }
 
-func TestReadDecodeErrorUnmarshal(t *testing.T) {
+func TestReadDecodeUnmarshal_Err(t *testing.T) {
 	expectedErr := "failed to unmarshal"
 	todos, err := readDecode(fileNameErr)
 	if err != nil {

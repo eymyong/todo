@@ -13,14 +13,18 @@ type RepoJsonFileMap struct {
 	fileName string
 }
 
-func readDecode(fname string) (map[string]model.Todo, error) {
-	j, err := os.ReadFile(fname)
+func readDecode(fileName string) (map[string]model.Todo, error) {
+	b, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read jsonfile: %w", err)
 	}
 
+	if len(b) == 0 {
+		return make(map[string]model.Todo), nil
+	}
+
 	todos := make(map[string]model.Todo)
-	err = json.Unmarshal(j, &todos)
+	err = json.Unmarshal(b, &todos)
 	if err != nil {
 		return nil, err
 	}
@@ -28,24 +32,27 @@ func readDecode(fname string) (map[string]model.Todo, error) {
 	return todos, nil
 }
 
-func (j *RepoJsonFileMap) Add(todo model.Todo) error {
+func writeEncode(fileName string, data interface{}) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshal: %w", err)
+	}
 
+	err = os.WriteFile(fileName, b, 0664)
+	if err != nil {
+		return fmt.Errorf("failed to writefile jsonfile: %w", err)
+	}
+
+	return nil
+}
+func (j *RepoJsonFileMap) Add(todo model.Todo) error {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return err
 	}
 
 	todoMap[todo.Id] = todo
-
-	todoByte, err := json.Marshal(todoMap)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(j.fileName, todoByte, 0664)
-	if err != nil {
-		return fmt.Errorf("fail to writefile %s: %w", j.fileName, err)
-	}
+	writeEncode(j.fileName, todoMap)
 
 	return nil
 }
@@ -56,9 +63,12 @@ func (j *RepoJsonFileMap) GetAll() ([]model.Todo, error) {
 		return []model.Todo{}, err
 	}
 
-	todoList := []model.Todo{}
+	todoList := make([]model.Todo, len(todoMap))
+
+	i := 0
 	for _, todo := range todoMap {
-		todoList = append(todoList, todo)
+		todoList[i] = todo
+		i++
 	}
 
 	return todoList, nil
@@ -70,6 +80,9 @@ func (j *RepoJsonFileMap) Get(id string) (model.Todo, error) {
 		return model.Todo{}, err
 	}
 
+	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
+	fmt.Println(todoMap)
+
 	todo, ok := todoMap[id]
 	if !ok {
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
@@ -79,46 +92,77 @@ func (j *RepoJsonFileMap) Get(id string) (model.Todo, error) {
 }
 
 func (j *RepoJsonFileMap) GetStatus(status model.Status) ([]model.Todo, error) {
-	panic("not implemented")
+	todoMap, err := readDecode(j.fileName)
+	if err != nil {
+		return []model.Todo{}, err
+	}
+
+	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
+
+	checkStatus := status.IsValid()
+	if !checkStatus {
+		return []model.Todo{}, fmt.Errorf("bad status: `%s`", status)
+	}
+
+	newTodos := []model.Todo{}
+
+	for _, todo := range todoMap {
+		if todo.Status == status {
+			newTodos = append(newTodos, todo)
+		}
+	}
+
+	return newTodos, nil
 }
 
-func (j *RepoJsonFileMap) UpdateData(id string, newdata string) (model.Todo, error) {
+func (j *RepoJsonFileMap) UpdateData(id string, newData string) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
 	}
+
+	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
 
 	old, ok := todoMap[id]
 	if !ok {
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
 	}
 
-	todoMap[id] = model.Todo{Id: id, Data: newdata}
-	todoMapByte, err := json.Marshal(todoMap)
+	copy := old
+	copy.Data = newData
+	todoMap[id] = copy
+
+	err = writeEncode(j.fileName, todoMap)
 	if err != nil {
 		return model.Todo{}, err
-	}
-
-	err = os.WriteFile(j.fileName, todoMapByte, 0664)
-	if err != nil {
-		return model.Todo{}, fmt.Errorf("failed to writefile jsonfile: %w", err)
 	}
 
 	return old, nil
 }
 
-func (j *RepoJsonFileMap) UpdateStatus(id string, status model.Status) (model.Todo, error) {
-	todos, err := readDecode(j.fileName)
+func (j *RepoJsonFileMap) UpdateStatus(id string, newStatus model.Status) (model.Todo, error) {
+	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
 	}
 
-	_, ok := todos[id]
-	if ok {
+	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
 
+	old, ok := todoMap[id]
+	if !ok {
+		return model.Todo{}, fmt.Errorf("no id: %s", id)
 	}
 
-	return model.Todo{}, nil
+	copy := old
+	copy.Status = newStatus
+	todoMap[id] = copy
+
+	err = writeEncode(j.fileName, todoMap)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	return old, nil
 }
 
 func (j *RepoJsonFileMap) Remove(id string) (model.Todo, error) {
@@ -127,18 +171,33 @@ func (j *RepoJsonFileMap) Remove(id string) (model.Todo, error) {
 		return model.Todo{}, err
 	}
 
+	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
+
 	todo, ok := todoMap[id]
 	if !ok {
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
 	}
-	delete(todoMap, id)
 
-	todoMapBytes, err := json.Marshal(todoMap)
-	if err != nil {
-		return model.Todo{}, err
+	//delete(todoMap, id)
+	// ถ้าใช้ delete ไม่ต้องทำข้างล่าง
+
+	todos := []model.Todo{}
+	for _, v := range todoMap {
+		if v.Id == id {
+			continue
+		}
+
+		todos = append(todos, v)
 	}
 
-	err = os.WriteFile(j.fileName, todoMapBytes, 0664)
+	newTodoMap := make(map[string]model.Todo)
+	for i := range todos {
+		value := todos[i]
+		key := value.Id
+		newTodoMap[key] = value
+	}
+
+	err = writeEncode(j.fileName, newTodoMap)
 	if err != nil {
 		return model.Todo{}, err
 	}
