@@ -213,7 +213,7 @@ func TestAdd_Happy(t *testing.T) {
 		fileName: fileName,
 	}
 
-	err := repo.Add(data)
+	err := repo.Add(nil, data)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 	}
@@ -282,7 +282,7 @@ func TestGetAll_Happy(t *testing.T) {
 		return
 	}
 
-	actualTodos, err := repo.GetAll()
+	actualTodos, err := repo.GetAll(nil)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -333,7 +333,7 @@ func TestGetAll_Err(t *testing.T) {
 	}
 	expectedErr := "not found data to file"
 
-	_, err := repo.GetAll()
+	_, err := repo.GetAll(nil)
 	if err == nil {
 		t.Errorf("expected err but got nil")
 		return
@@ -369,7 +369,7 @@ func TestGet_Happy(t *testing.T) {
 		return
 	}
 
-	actual, err := repo.Get(expectedTodo.Id)
+	actual, err := repo.Get(nil, expectedTodo.Id)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -407,7 +407,7 @@ func TestGet_IdErr(t *testing.T) {
 	expectedErr := "not found id"
 	expectedId := "kuy"
 
-	_, err = repo.Get(expectedId)
+	_, err = repo.Get(nil, expectedId)
 	if err == nil {
 		t.Errorf("expected err but got nil")
 		return
@@ -451,7 +451,7 @@ func TestGetStatus_Happy(t *testing.T) {
 	}
 
 	repo := RepoTextFile{fileName: fileName}
-	actuals, err := repo.GetStatus(model.StatusTodo)
+	actuals, err := repo.GetStatus(nil, model.StatusTodo)
 	if err != nil {
 		t.Error("unexpected error", err)
 	}
@@ -501,7 +501,7 @@ func TestGet_statusErr(t *testing.T) {
 	expectedErr := "status is not correct"
 	expectedStatus := model.Status("kuyy")
 
-	_, err = repo.GetStatus(expectedStatus)
+	_, err = repo.GetStatus(nil, expectedStatus)
 	if err == nil {
 		t.Errorf("expected err but got nil")
 		return
@@ -556,7 +556,7 @@ func TestUpdateData_Happy(t *testing.T) {
 	newData := "two"
 
 	repo := RepoTextFile{fileName: fileName}
-	actuals, err := repo.UpdateData(expectedTodo.Id, newData)
+	actuals, err := repo.UpdateData(nil, expectedTodo.Id, newData)
 	if err != nil {
 		t.Error("unexpected error", err)
 		return
@@ -606,7 +606,7 @@ func TestUpdateData_IdErr(t *testing.T) {
 
 	repo := RepoTextFile{fileName: fileName}
 
-	_, err = repo.UpdateData("10", newData)
+	_, err = repo.UpdateData(nil, "10", newData)
 	if err == nil {
 		t.Errorf("expected err but got nil")
 		return
@@ -653,7 +653,7 @@ func TestUpdateStatus_Happy(t *testing.T) {
 
 	newStatus := model.StatusDone
 	repo := RepoTextFile{fileName: fileName}
-	_, err = repo.UpdateStatus(data[0].Id, newStatus)
+	_, err = repo.UpdateStatus(nil, data[0].Id, newStatus)
 	if err != nil {
 		t.Error("unexpected error", err)
 		return
@@ -705,7 +705,7 @@ func TestRemove_Happy(t *testing.T) {
 
 	idToRemove := data[0].Id
 	repo := RepoTextFile{fileName: fileName}
-	_, err = repo.Remove(idToRemove)
+	_, err = repo.Remove(nil, idToRemove)
 	if err != nil {
 		t.Errorf("unexpectErr")
 	}

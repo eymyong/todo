@@ -51,7 +51,7 @@ func (h *HandlerTodo) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo, err := h.repo.Get(id)
+	todo, err := h.repo.Get(nil, id)
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  fmt.Sprintf("failed to get todo %s", id),
@@ -65,7 +65,7 @@ func (h *HandlerTodo) GetById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HandlerTodo) GetAll(w http.ResponseWriter, r *http.Request) {
-	todos, err := h.repo.GetAll()
+	todos, err := h.repo.GetAll(nil)
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  "failed to get all todos",
@@ -119,7 +119,7 @@ func (h *HandlerTodo) GetAllStatus(w http.ResponseWriter, r *http.Request) {
 		rr.Status = model.StatusTodo
 	}
 
-	statusTodoList, err := h.repo.GetStatus(rr.Status)
+	statusTodoList, err := h.repo.GetStatus(nil, rr.Status)
 	if err != nil {
 		sendJson(w, 400, map[string]interface{}{
 			"err":    "invalid status",
@@ -150,7 +150,7 @@ func (h *HandlerTodo) Add(w http.ResponseWriter, r *http.Request) {
 		Status: model.StatusTodo,
 	}
 
-	err = h.repo.Add(todo)
+	err = h.repo.Add(nil, todo)
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  "failed to create todo",
@@ -176,7 +176,7 @@ func (h *HandlerTodo) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo, err := h.repo.Remove(id)
+	todo, err := h.repo.Remove(nil, id)
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  fmt.Sprintf("failed to remove id %s", id),
@@ -210,7 +210,7 @@ func (h *HandlerTodo) UpdateId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo, err := h.repo.UpdateData(id, string(b))
+	todo, err := h.repo.UpdateData(nil, id, string(b))
 	if err != nil {
 		sendJson(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":  fmt.Sprintf("failed to update id %s", id),
@@ -271,7 +271,7 @@ func (h *HandlerTodo) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 		rr.Status = model.StatusTodo
 	}
 
-	status, err := h.repo.UpdateStatus(id, rr.Status)
+	status, err := h.repo.UpdateStatus(nil, id, rr.Status)
 	if err != nil {
 		sendJson(w, 500, map[string]interface{}{
 			"err":    "update-status error",

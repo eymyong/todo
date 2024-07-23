@@ -48,6 +48,7 @@ type job struct {
 const JsonFile = "json"
 const JsonMap = "jsonmap"
 const TextFile = "text"
+const Redis = "redis"
 
 func initRepo() repo.Repository {
 	envRepo := os.Getenv("REPO")
@@ -69,6 +70,11 @@ func initRepo() repo.Repository {
 		}
 
 		repo = textfile.New(envFile)
+		// TODO
+	case Redis:
+		if envFile == "" {
+			envFile = ""
+		}
 
 	default:
 		if envFile == "" {
@@ -263,7 +269,7 @@ func parse(args []string) (job, error) {
 
 func methodAdd(r repo.Repository, data string) error {
 
-	err := r.Add(model.Todo{
+	err := r.Add(nil, model.Todo{
 		Id:     uuid.NewString(),
 		Data:   data,
 		Status: model.StatusTodo,
@@ -275,7 +281,7 @@ func methodAdd(r repo.Repository, data string) error {
 }
 
 func methodGetAll(r repo.Repository) ([]model.Todo, error) {
-	todoList, err := r.GetAll()
+	todoList, err := r.GetAll(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +289,7 @@ func methodGetAll(r repo.Repository) ([]model.Todo, error) {
 }
 
 func methodGetById(r repo.Repository, id string) (model.Todo, error) {
-	todo, err := r.Get(id)
+	todo, err := r.Get(nil, id)
 	if err != nil {
 		return model.Todo{}, err
 	}
@@ -292,7 +298,7 @@ func methodGetById(r repo.Repository, id string) (model.Todo, error) {
 }
 
 func methodGetByStatus(r repo.Repository, status model.Status) ([]model.Todo, error) {
-	todo, err := r.GetStatus(status)
+	todo, err := r.GetStatus(nil, status)
 	if err != nil {
 		return []model.Todo{}, err
 	}
@@ -301,7 +307,7 @@ func methodGetByStatus(r repo.Repository, status model.Status) ([]model.Todo, er
 }
 
 func methodUpdateData(r repo.Repository, id string, newdata string) (model.Todo, error) {
-	todo, err := r.UpdateData(id, newdata)
+	todo, err := r.UpdateData(nil, id, newdata)
 	if err != nil {
 		return model.Todo{}, err
 	}
@@ -310,7 +316,7 @@ func methodUpdateData(r repo.Repository, id string, newdata string) (model.Todo,
 }
 
 func methodUpdateStatus(r repo.Repository, id string, status model.Status) (model.Todo, error) {
-	todo, err := r.UpdateStatus(id, status)
+	todo, err := r.UpdateStatus(nil, id, status)
 	if err != nil {
 		return model.Todo{}, err
 	}
@@ -319,7 +325,7 @@ func methodUpdateStatus(r repo.Repository, id string, status model.Status) (mode
 }
 
 func methodRemove(r repo.Repository, id string) (model.Todo, error) {
-	todo, err := r.Remove(id)
+	todo, err := r.Remove(nil, id)
 	if err != nil {
 		return model.Todo{}, err
 	}

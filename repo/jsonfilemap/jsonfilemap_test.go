@@ -211,7 +211,7 @@ func TestAdd_Happy(t *testing.T) {
 	}
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	err = repo.Add(newData)
+	err = repo.Add(nil, newData)
 	if err != nil {
 		t.Errorf("unexpect err: `%s`", err)
 		return
@@ -270,7 +270,7 @@ func TestGetAll_Happy(t *testing.T) {
 	}
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	newTodos, err := repo.GetAll()
+	newTodos, err := repo.GetAll(nil)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -327,7 +327,7 @@ func TestGetData_Happy(t *testing.T) {
 	get := todos[0]
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	todo, err := repo.Get(get.Id)
+	todo, err := repo.Get(nil, get.Id)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -380,7 +380,7 @@ func TestGetStatus_Happy(t *testing.T) {
 	getStatus := model.StatusTodo
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	todoStatus, err := repo.GetStatus(getStatus)
+	todoStatus, err := repo.GetStatus(nil, getStatus)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -448,7 +448,7 @@ func TestUpdateData_Happy(t *testing.T) {
 	newData := "oneone"
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	_, err = repo.UpdateData(id, newData)
+	_, err = repo.UpdateData(nil, id, newData)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -508,7 +508,7 @@ func TestUpdateStatus_Happy(t *testing.T) {
 	newStatus := model.StatusDone
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	_, err = repo.UpdateStatus(id, newStatus)
+	_, err = repo.UpdateStatus(nil, id, newStatus)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -567,7 +567,7 @@ func TestRemove_Happy(t *testing.T) {
 	id := "1"
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	_, err = repo.Remove(id)
+	_, err = repo.Remove(nil, id)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return
@@ -629,7 +629,7 @@ func TestRemove_IdErr(t *testing.T) {
 	id := "66"
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	_, err = repo.Remove(id)
+	_, err = repo.Remove(nil, id)
 	if err == nil {
 		t.Errorf("expected err but got nil")
 		return

@@ -193,7 +193,7 @@ func TestAddHappy(t *testing.T) {
 	expectedTodos := makeTodos()
 	newTodo := expectedTodos[0]
 
-	err := repo.Add(newTodo)
+	err := repo.Add(nil, newTodo)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
 		return
@@ -232,7 +232,7 @@ func TestAddFileError(t *testing.T) {
 
 	dataToAdd := expectedTodos[0]
 
-	err := repo.Add(dataToAdd)
+	err := repo.Add(nil, dataToAdd)
 	if err == nil {
 		t.Errorf("expected error but got nil")
 	}
@@ -259,7 +259,7 @@ func TestUpdateDataHappy(t *testing.T) {
 
 	newData := "pak"
 
-	_, err = repo.UpdateData(updateTo.Id, newData)
+	_, err = repo.UpdateData(nil, updateTo.Id, newData)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -308,7 +308,7 @@ func TestUpdateStatusHappy(t *testing.T) {
 		return
 	}
 
-	_, err = repo.UpdateStatus(updateTo.Id, newStatus)
+	_, err = repo.UpdateStatus(nil, updateTo.Id, newStatus)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
 	}
@@ -346,7 +346,7 @@ func TestDeleteHappy(t *testing.T) {
 		return
 	}
 
-	_, err = repo.Remove(deleteToID)
+	_, err = repo.Remove(nil, deleteToID)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
 		return
@@ -392,7 +392,7 @@ func TestGetAll(t *testing.T) {
 		return
 	}
 
-	todos, err := repo.GetAll()
+	todos, err := repo.GetAll(nil)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
 		return
@@ -431,7 +431,7 @@ func TestGet(t *testing.T) {
 		return
 	}
 
-	todo, err := repo.Get(get.Id)
+	todo, err := repo.Get(nil, get.Id)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err.Error())
 		return
@@ -468,7 +468,7 @@ func TestGetSatatus(t *testing.T) {
 	var allStatus model.Status
 	switch allStatus {
 	case TODO:
-		todosStatusTodo, err := repo.GetStatus(TODO)
+		todosStatusTodo, err := repo.GetStatus(nil, TODO)
 		if err != nil {
 			t.Errorf("unexpected err: `%s`", err.Error())
 		}
@@ -482,7 +482,7 @@ func TestGetSatatus(t *testing.T) {
 		fallthrough
 
 	default:
-		todosStatusDone, err := repo.GetStatus(DONE)
+		todosStatusDone, err := repo.GetStatus(nil, DONE)
 		if err != nil {
 			t.Errorf("unexpected err: `%s`", err.Error())
 		}
@@ -519,7 +519,7 @@ func TestGetSatatus2(t *testing.T) {
 		return
 	}
 
-	todosStatusTodo, err := repo.GetStatus(statusTODO)
+	todosStatusTodo, err := repo.GetStatus(nil, statusTODO)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err.Error())
 	}
@@ -530,7 +530,7 @@ func TestGetSatatus2(t *testing.T) {
 		}
 	}
 
-	todosStatusDone, err := repo.GetStatus(statusDONE)
+	todosStatusDone, err := repo.GetStatus(nil, statusDONE)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err.Error())
 	}

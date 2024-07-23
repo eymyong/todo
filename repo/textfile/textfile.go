@@ -1,6 +1,7 @@
 package textfile
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -20,7 +21,7 @@ type RepoTextFile struct {
 	fileName string
 }
 
-func (j *RepoTextFile) Add(todo model.Todo) error {
+func (j *RepoTextFile) Add(_ context.Context, todo model.Todo) error {
 	todosList, err := readDecode(j.fileName)
 	if err != nil {
 		return err
@@ -37,7 +38,7 @@ func (j *RepoTextFile) Add(todo model.Todo) error {
 	return nil
 }
 
-func (j *RepoTextFile) GetAll() ([]model.Todo, error) {
+func (j *RepoTextFile) GetAll(_ context.Context) ([]model.Todo, error) {
 	todosList, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, err
@@ -50,7 +51,7 @@ func (j *RepoTextFile) GetAll() ([]model.Todo, error) {
 	return todosList, nil
 }
 
-func (j *RepoTextFile) Get(id string) (model.Todo, error) {
+func (j *RepoTextFile) Get(_ context.Context, id string) (model.Todo, error) {
 	todosList, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -75,7 +76,7 @@ func (j *RepoTextFile) Get(id string) (model.Todo, error) {
 	return model.Todo{}, nil
 }
 
-func (j *RepoTextFile) GetStatus(status model.Status) ([]model.Todo, error) {
+func (j *RepoTextFile) GetStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
 	todosList, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, err
@@ -100,7 +101,7 @@ func (j *RepoTextFile) GetStatus(status model.Status) ([]model.Todo, error) {
 	return newTodoList, nil
 }
 
-func (j *RepoTextFile) UpdateData(id string, newData string) (model.Todo, error) {
+func (j *RepoTextFile) UpdateData(_ context.Context, id string, newData string) (model.Todo, error) {
 	todos, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -138,7 +139,7 @@ func (j *RepoTextFile) UpdateData(id string, newData string) (model.Todo, error)
 	return old, nil
 }
 
-func (j *RepoTextFile) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+func (j *RepoTextFile) UpdateStatus(_ context.Context, id string, status model.Status) (model.Todo, error) {
 	todos, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -181,7 +182,7 @@ func (j *RepoTextFile) UpdateStatus(id string, status model.Status) (model.Todo,
 	return old, nil
 }
 
-func (j *RepoTextFile) Remove(id string) (model.Todo, error) {
+func (j *RepoTextFile) Remove(_ context.Context, id string) (model.Todo, error) {
 	todos, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err

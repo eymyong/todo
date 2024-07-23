@@ -1,6 +1,7 @@
 package jsonfilemap
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -45,7 +46,7 @@ func writeEncode(fileName string, data interface{}) error {
 
 	return nil
 }
-func (j *RepoJsonFileMap) Add(todo model.Todo) error {
+func (j *RepoJsonFileMap) Add(_ context.Context, todo model.Todo) error {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return err
@@ -57,7 +58,7 @@ func (j *RepoJsonFileMap) Add(todo model.Todo) error {
 	return nil
 }
 
-func (j *RepoJsonFileMap) GetAll() ([]model.Todo, error) {
+func (j *RepoJsonFileMap) GetAll(_ context.Context) ([]model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, err
@@ -74,7 +75,7 @@ func (j *RepoJsonFileMap) GetAll() ([]model.Todo, error) {
 	return todoList, nil
 }
 
-func (j *RepoJsonFileMap) Get(id string) (model.Todo, error) {
+func (j *RepoJsonFileMap) Get(_ context.Context, id string) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -91,7 +92,7 @@ func (j *RepoJsonFileMap) Get(id string) (model.Todo, error) {
 	return todo, nil
 }
 
-func (j *RepoJsonFileMap) GetStatus(status model.Status) ([]model.Todo, error) {
+func (j *RepoJsonFileMap) GetStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, err
@@ -115,7 +116,7 @@ func (j *RepoJsonFileMap) GetStatus(status model.Status) ([]model.Todo, error) {
 	return newTodos, nil
 }
 
-func (j *RepoJsonFileMap) UpdateData(id string, newData string) (model.Todo, error) {
+func (j *RepoJsonFileMap) UpdateData(_ context.Context, id string, newData string) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -140,7 +141,7 @@ func (j *RepoJsonFileMap) UpdateData(id string, newData string) (model.Todo, err
 	return old, nil
 }
 
-func (j *RepoJsonFileMap) UpdateStatus(id string, newStatus model.Status) (model.Todo, error) {
+func (j *RepoJsonFileMap) UpdateStatus(_ context.Context, id string, newStatus model.Status) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err
@@ -165,7 +166,7 @@ func (j *RepoJsonFileMap) UpdateStatus(id string, newStatus model.Status) (model
 	return old, nil
 }
 
-func (j *RepoJsonFileMap) Remove(id string) (model.Todo, error) {
+func (j *RepoJsonFileMap) Remove(_ context.Context, id string) (model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, err

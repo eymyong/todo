@@ -1,6 +1,7 @@
 package jsonfile
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -47,7 +48,7 @@ func writeEncode(fileName string, data interface{}) error {
 	return nil
 }
 
-func (j *RepoJsonFile) Add(todo model.Todo) error {
+func (j *RepoJsonFile) Add(_ context.Context, todo model.Todo) error {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return fmt.Errorf("failed to add jsonfile: %w", err)
@@ -63,11 +64,11 @@ func (j *RepoJsonFile) Add(todo model.Todo) error {
 	return nil
 }
 
-func (j *RepoJsonFile) GetAll() ([]model.Todo, error) {
+func (j *RepoJsonFile) GetAll(_ context.Context) ([]model.Todo, error) {
 	return readDecode(j.fileName)
 }
 
-func (j *RepoJsonFile) Get(id string) (model.Todo, error) {
+func (j *RepoJsonFile) Get(_ context.Context, id string) (model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, fmt.Errorf("failed to get jsonfile: %w", err)
@@ -83,7 +84,7 @@ func (j *RepoJsonFile) Get(id string) (model.Todo, error) {
 	return model.Todo{}, fmt.Errorf("no id: %s", id)
 }
 
-func (j *RepoJsonFile) GetStatus(status model.Status) ([]model.Todo, error) {
+func (j *RepoJsonFile) GetStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, fmt.Errorf("failed to get-status jsonfile: %w", err)
@@ -99,7 +100,7 @@ func (j *RepoJsonFile) GetStatus(status model.Status) ([]model.Todo, error) {
 	return statusTodoList, nil
 }
 
-func (j *RepoJsonFile) UpdateData(id string, newdata string) (model.Todo, error) {
+func (j *RepoJsonFile) UpdateData(_ context.Context, id string, newdata string) (model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, fmt.Errorf("failed to update-data jsonfile: %w", err)
@@ -126,7 +127,7 @@ func (j *RepoJsonFile) UpdateData(id string, newdata string) (model.Todo, error)
 	return old, nil
 }
 
-func (j *RepoJsonFile) UpdateStatus(id string, status model.Status) (model.Todo, error) {
+func (j *RepoJsonFile) UpdateStatus(_ context.Context, id string, status model.Status) (model.Todo, error) {
 	todos, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, fmt.Errorf("failed to update-status jsonfile: %w", err)
@@ -155,7 +156,7 @@ func (j *RepoJsonFile) UpdateStatus(id string, status model.Status) (model.Todo,
 	return *old, nil
 }
 
-func (j *RepoJsonFile) Remove(id string) (model.Todo, error) {
+func (j *RepoJsonFile) Remove(_ context.Context, id string) (model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return model.Todo{}, fmt.Errorf("failed to Remove: %w", err)
