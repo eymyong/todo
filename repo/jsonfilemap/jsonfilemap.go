@@ -82,7 +82,7 @@ func (j *RepoJsonFileMap) Get(_ context.Context, id string) (model.Todo, error) 
 	}
 
 	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
-	fmt.Println(todoMap)
+	//fmt.Println(todoMap)
 
 	todo, ok := todoMap[id]
 	if !ok {

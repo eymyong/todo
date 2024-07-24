@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"github.com/eymyong/todo/repo/jsonfile"
 	"github.com/eymyong/todo/repo/jsonfilemap"
 	"github.com/eymyong/todo/repo/textfile"
+	"github.com/eymyong/todo/repo/todoredis"
 	"github.com/google/uuid"
 )
 
@@ -75,6 +77,8 @@ func initRepo() repo.Repository {
 		if envFile == "" {
 			envFile = ""
 		}
+
+		repo = todoredis.New("127.0.0.1:6379", 1)
 
 	default:
 		if envFile == "" {
@@ -267,9 +271,11 @@ func parse(args []string) (job, error) {
 
 }
 
-func methodAdd(r repo.Repository, data string) error {
+// ทำถูกไหม
 
-	err := r.Add(nil, model.Todo{
+func methodAdd(r repo.Repository, data string) error {
+	ctx := context.Background()
+	err := r.Add(ctx, model.Todo{
 		Id:     uuid.NewString(),
 		Data:   data,
 		Status: model.StatusTodo,
@@ -281,7 +287,8 @@ func methodAdd(r repo.Repository, data string) error {
 }
 
 func methodGetAll(r repo.Repository) ([]model.Todo, error) {
-	todoList, err := r.GetAll(nil)
+	ctx := context.Background()
+	todoList, err := r.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +296,8 @@ func methodGetAll(r repo.Repository) ([]model.Todo, error) {
 }
 
 func methodGetById(r repo.Repository, id string) (model.Todo, error) {
-	todo, err := r.Get(nil, id)
+	ctx := context.Background()
+	todo, err := r.Get(ctx, id)
 	if err != nil {
 		return model.Todo{}, err
 	}
@@ -298,7 +306,8 @@ func methodGetById(r repo.Repository, id string) (model.Todo, error) {
 }
 
 func methodGetByStatus(r repo.Repository, status model.Status) ([]model.Todo, error) {
-	todo, err := r.GetStatus(nil, status)
+	ctx := context.Background()
+	todo, err := r.GetStatus(ctx, status)
 	if err != nil {
 		return []model.Todo{}, err
 	}
@@ -307,7 +316,8 @@ func methodGetByStatus(r repo.Repository, status model.Status) ([]model.Todo, er
 }
 
 func methodUpdateData(r repo.Repository, id string, newdata string) (model.Todo, error) {
-	todo, err := r.UpdateData(nil, id, newdata)
+	ctx := context.Background()
+	todo, err := r.UpdateData(ctx, id, newdata)
 	if err != nil {
 		return model.Todo{}, err
 	}
@@ -316,7 +326,8 @@ func methodUpdateData(r repo.Repository, id string, newdata string) (model.Todo,
 }
 
 func methodUpdateStatus(r repo.Repository, id string, status model.Status) (model.Todo, error) {
-	todo, err := r.UpdateStatus(nil, id, status)
+	ctx := context.Background()
+	todo, err := r.UpdateStatus(ctx, id, status)
 	if err != nil {
 		return model.Todo{}, err
 	}
@@ -325,7 +336,8 @@ func methodUpdateStatus(r repo.Repository, id string, status model.Status) (mode
 }
 
 func methodRemove(r repo.Repository, id string) (model.Todo, error) {
-	todo, err := r.Remove(nil, id)
+	ctx := context.Background()
+	todo, err := r.Remove(ctx, id)
 	if err != nil {
 		return model.Todo{}, err
 	}
