@@ -1,5 +1,7 @@
 package model
 
+import "errors"
+
 type Todo struct {
 	Id     string `json:"id"`
 	Data   string `json:"data"`
@@ -7,6 +9,14 @@ type Todo struct {
 }
 
 type Status string
+
+func (s Status) MarshalBinary() (data []byte, err error) {
+	if s == "" {
+		return nil, errors.New("status is empty string")
+	}
+
+	return []byte(s), nil
+}
 
 const (
 	StatusTodo Status = "TODO"

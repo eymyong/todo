@@ -72,13 +72,9 @@ func initRepo() repo.Repository {
 		}
 
 		repo = textfile.New(envFile)
-		// TODO
-	case Redis:
-		if envFile == "" {
-			envFile = ""
-		}
 
-		repo = todoredis.New("127.0.0.1:6379", 1)
+	case Redis:
+		repo = todoredis.New("127.0.0.1:6379")
 
 	default:
 		if envFile == "" {
@@ -271,14 +267,12 @@ func parse(args []string) (job, error) {
 
 }
 
-// ทำถูกไหม
-
 func methodAdd(r repo.Repository, data string) error {
 	ctx := context.Background()
 	err := r.Add(ctx, model.Todo{
 		Id:     uuid.NewString(),
 		Data:   data,
-		Status: model.StatusTodo,
+		Status: "TODO",
 	})
 	if err != nil {
 		return err
@@ -307,7 +301,7 @@ func methodGetById(r repo.Repository, id string) (model.Todo, error) {
 
 func methodGetByStatus(r repo.Repository, status model.Status) ([]model.Todo, error) {
 	ctx := context.Background()
-	todo, err := r.GetStatus(ctx, status)
+	todo, err := r.GetByStatus(ctx, status)
 	if err != nil {
 		return []model.Todo{}, err
 	}

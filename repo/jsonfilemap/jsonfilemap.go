@@ -92,7 +92,7 @@ func (j *RepoJsonFileMap) Get(_ context.Context, id string) (model.Todo, error) 
 	return todo, nil
 }
 
-func (j *RepoJsonFileMap) GetStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
+func (j *RepoJsonFileMap) GetByStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
 	todoMap, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, err

@@ -20,41 +20,53 @@ func main() {
 
 	ctx := context.Background()
 
-	err := rd.HSet(ctx, "person:1", "name", "yong", "age", "10").Err()
-	// err := rd.SetEx(ctx, "testgo", "newdata2", time.Second*5).Err()
+	err := rd.HSet(ctx, "test:1", "id", "2", "data", "two", "status", "DONE").Err()
 	if err != nil {
 		panic(err)
 	}
 
-	// result, err := rd.HGet(ctx, "person:1", "name").Result()
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	//repo := rRedis{rd : rd}
-	repo := repoRedis{rd: rd}
-	err = repo.addTodo(ctx, model.Todo{
-		Id:     "2222",
-		Data:   "twotwotwo",
-		Status: "DONE",
-	})
+	keyStr, err := rd.Keys(ctx, "*").Result()
 	if err != nil {
 		panic(err)
 	}
 
-	status, err := repo.getStatus(ctx, "2222")
+	fmt.Println("keys in redis")
+	for _, v := range keyStr {
+		fmt.Println(v)
+	}
+
+	todos := []model.Todo{}
+	for _, v := range keyStr {
+		data, err := rd.HGetAll(ctx, v).Result()
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(data)
+
+		//datab, err := json.Marshal(data)
+		//json.Unmarshal(datab)
+		todo := model.Todo{}
+		for k, v := range data {
+			switch k {
+			case "id":
+				todo.Id = v
+			case "data":
+				todo.Data = v
+			case "status":
+				todo.Status = model.Status(v)
+			default:
+			}
+		}
+		todos = append(todos, todo)
+
+	}
+
+	fmt.Println(todos)
+
+	err = rd.Del(ctx, "test:1").Err()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("status", status)
-
-	// result, err := rd.Get(ctx, "zz").Result()
-	// if err != nil {
-	// 	if err != redis.Nil {
-	// 		panic(err)
-	// 	}
-	// }
-
-	// fmt.Println(result)
 }

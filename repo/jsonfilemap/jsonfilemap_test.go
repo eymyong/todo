@@ -380,7 +380,7 @@ func TestGetStatus_Happy(t *testing.T) {
 	getStatus := model.StatusTodo
 
 	repo := RepoJsonFileMap{fileName: fileName}
-	todoStatus, err := repo.GetStatus(nil, getStatus)
+	todoStatus, err := repo.GetByStatus(nil, getStatus)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err)
 		return

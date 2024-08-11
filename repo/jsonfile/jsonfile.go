@@ -84,7 +84,7 @@ func (j *RepoJsonFile) Get(_ context.Context, id string) (model.Todo, error) {
 	return model.Todo{}, fmt.Errorf("no id: %s", id)
 }
 
-func (j *RepoJsonFile) GetStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
+func (j *RepoJsonFile) GetByStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
 	todoList, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, fmt.Errorf("failed to get-status jsonfile: %w", err)

@@ -451,7 +451,7 @@ func TestGetStatus_Happy(t *testing.T) {
 	}
 
 	repo := RepoTextFile{fileName: fileName}
-	actuals, err := repo.GetStatus(nil, model.StatusTodo)
+	actuals, err := repo.GetByStatus(nil, model.StatusTodo)
 	if err != nil {
 		t.Error("unexpected error", err)
 	}
@@ -501,7 +501,7 @@ func TestGet_statusErr(t *testing.T) {
 	expectedErr := "status is not correct"
 	expectedStatus := model.Status("kuyy")
 
-	_, err = repo.GetStatus(nil, expectedStatus)
+	_, err = repo.GetByStatus(nil, expectedStatus)
 	if err == nil {
 		t.Errorf("expected err but got nil")
 		return

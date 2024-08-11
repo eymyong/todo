@@ -468,7 +468,7 @@ func TestGetSatatus(t *testing.T) {
 	var allStatus model.Status
 	switch allStatus {
 	case TODO:
-		todosStatusTodo, err := repo.GetStatus(nil, TODO)
+		todosStatusTodo, err := repo.GetByStatus(nil, TODO)
 		if err != nil {
 			t.Errorf("unexpected err: `%s`", err.Error())
 		}
@@ -482,7 +482,7 @@ func TestGetSatatus(t *testing.T) {
 		fallthrough
 
 	default:
-		todosStatusDone, err := repo.GetStatus(nil, DONE)
+		todosStatusDone, err := repo.GetByStatus(nil, DONE)
 		if err != nil {
 			t.Errorf("unexpected err: `%s`", err.Error())
 		}
@@ -519,7 +519,7 @@ func TestGetSatatus2(t *testing.T) {
 		return
 	}
 
-	todosStatusTodo, err := repo.GetStatus(nil, statusTODO)
+	todosStatusTodo, err := repo.GetByStatus(nil, statusTODO)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err.Error())
 	}
@@ -530,7 +530,7 @@ func TestGetSatatus2(t *testing.T) {
 		}
 	}
 
-	todosStatusDone, err := repo.GetStatus(nil, statusDONE)
+	todosStatusDone, err := repo.GetByStatus(nil, statusDONE)
 	if err != nil {
 		t.Errorf("unexpected err: `%s`", err.Error())
 	}

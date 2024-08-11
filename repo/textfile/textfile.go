@@ -76,7 +76,7 @@ func (j *RepoTextFile) Get(_ context.Context, id string) (model.Todo, error) {
 	return model.Todo{}, nil
 }
 
-func (j *RepoTextFile) GetStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
+func (j *RepoTextFile) GetByStatus(_ context.Context, status model.Status) ([]model.Todo, error) {
 	todosList, err := readDecode(j.fileName)
 	if err != nil {
 		return []model.Todo{}, err

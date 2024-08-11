@@ -15,115 +15,177 @@ id "udkfdhfl",
 data: "yong",
 status: "TODO"
 */
-func redisKeyTodo(t model.Todo) string {
-	return "todo: " + t.Id
+func redisKeyTodo(id string) string {
+	return "todo: " + id
 }
 
 type RepoRedis struct {
 	rd *redis.Client
 }
 
-func New(addr string, db int) repo.Repository {
+func New(addr string) repo.Repository {
 	rd := redis.NewClient(&redis.Options{
 		Addr: addr,
-		DB:   db,
+		// DB:   db,
 	})
-
-	//ctx := context.Background()
-
-	// result, err := rd.HSet(ctx, "todo:1", "id", "", "data", "", "status", "").Result()
-	// if err != nil {
-	// 	panic("failed to write empty array to init file: " + err.Error())
-	// }
-	// _=result
 
 	return &RepoRedis{rd: rd}
 }
 
-// Implement
-
-// key : json
-// todo: udkfdhfl " "id":"udkfdhfl","data":"yong","status":"TODO" "
 func (j *RepoRedis) Add(ctx context.Context, data model.Todo) error {
-	err := j.rd.HSet(ctx, redisKeyTodo(data), model.Todo{Id: data.Id, Data: data.Data, Status: data.Status}).Err()
-	//err := j.rd.HSet(ctx, redisKeyTodo(data), model.Todo{}.Id, data.Id, model.Todo{}.Data, data.Data, model.Todo{}.Status, data.Status).Err()
+	err := j.rd.HSet(ctx, redisKeyTodo(data.Id), "id", data.Id, "data", data.Data, "status", data.Status).Err()
+
 	if err != nil {
-		return fmt.Errorf("hset redis err %w", err)
+		return fmt.Errorf("hset redis err: %w", err)
 	}
 	return nil
 }
 
-/*
-todo: {udkfdhfl} ;id "udkfdhfl",data: "yong", status: "TODO" >> keyMain = string,keyField = json
-
-todo: {udkfdhfl}
-id: "udkfdhfl"
-data: "yong"
-status: "TODO"
-*/
-
 func (j *RepoRedis) GetAll(ctx context.Context) ([]model.Todo, error) {
-	// result2, err := j.rd.HGetAll(ctx, "todo: ").Result()
-	// if err != nil {
-	// 	return []model.Todo{}, fmt.Errorf("hgetall redis err %w", err)
-	// }
-	// _ = result2
-
 	todos := []model.Todo{}
 
 	keyMain, err := j.rd.Keys(ctx, "*").Result()
 	if err != nil {
-		return []model.Todo{}, fmt.Errorf("keys redis err %w", err)
+		return []model.Todo{}, fmt.Errorf("keys redis err: %w", err)
 	}
 
-	//get = km kf > v
-	//getall = km > f1,v1, f2,v2 f3,v3
-
-	t := model.Todo{}
 	for _, v := range keyMain {
 		keyMainMap, err := j.rd.HGetAll(ctx, v).Result()
-		if err != nil {  
-			return []model.Todo{}, fmt.Errorf("hgetall redis err %w", err)
+		if err != nil {
+			return []model.Todo{}, fmt.Errorf("hgetall redis err: %w", err)
 		}
-
-		for i := range keyMainMap {
-			field := keyMainMap[i]
-			s, err := j.rd.HGet(ctx, field,field.).Result()
-			if err != nil {
-				return []model.Todo{}, fmt.Errorf("hget redis err %w", err)
+		todo := model.Todo{}
+		for k, v := range keyMainMap {
+			switch k {
+			case "id":
+				todo.Id = v
+			case "data":
+				todo.Data = v
+			case "status":
+				todo.Status = model.Status(v)
+			default:
 			}
-
-			t.Id = s
-			t.Data = ""
 		}
-
-		// line := strings.Split(todo[value], "\n")
-		// t.Id = line[1]
-		// t.Data = line[3]
-		// t.Status = model.Status(line[5])
-
-		todos = append(todos, t)
+		todos = append(todos, todo)
 	}
 
 	return todos, nil
 }
 
 func (j *RepoRedis) Get(ctx context.Context, id string) (model.Todo, error) {
-	panic("")
+	mapStr, err := j.rd.HGetAll(ctx, redisKeyTodo(id)).Result()
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	todo := model.Todo{}
+	for k, v := range mapStr {
+		switch k {
+		case "id":
+			todo.Id = v
+		case "data":
+			todo.Data = v
+		case "status":
+			todo.Status = model.Status(v)
+		default:
+		}
+	}
+
+	return todo, nil
 }
 
-func (j *RepoRedis) GetStatus(ctx context.Context, status model.Status) ([]model.Todo, error) {
-	panic("")
+func (j *RepoRedis) GetByStatus(ctx context.Context, status model.Status) ([]model.Todo, error) {
+	all, err := j.GetAll(ctx)
+	if err != nil {
+		return []model.Todo{}, err
+	}
+
+	targets := []model.Todo{}
+	for _, v := range all {
+		if v.Status == status {
+			targets = append(targets, v)
+		}
+	}
+
+	return targets, nil
 }
 
 func (j *RepoRedis) UpdateData(ctx context.Context, id string, newdata string) (model.Todo, error) {
-	panic("")
+	todos, err := j.GetAll(ctx)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	old := model.Todo{}
+	for _, v := range todos {
+		if v.Id == id {
+			old = v
+			v.Data = newdata
+
+			err := j.rd.HSet(ctx, redisKeyTodo(id), "data", v.Data).Err()
+			if err != nil {
+				return model.Todo{}, fmt.Errorf("hset redis err: %w", err)
+			}
+
+			return old, nil
+		}
+	}
+
+	return model.Todo{}, fmt.Errorf("not found id: %s", id)
 }
 
 func (j *RepoRedis) UpdateStatus(ctx context.Context, id string, status model.Status) (model.Todo, error) {
-	panic("")
+	todos, err := j.GetAll(ctx)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	statusOk := status.IsValid()
+	if statusOk != true {
+		return model.Todo{}, fmt.Errorf("bad status: %s", status)
+	}
+
+	old := model.Todo{}
+	for _, v := range todos {
+		if v.Id == id {
+			old = v
+			v.Status = status
+
+			err := j.rd.HSet(ctx, redisKeyTodo(id), "status", v.Status).Err()
+			if err != nil {
+				return model.Todo{}, fmt.Errorf("hset redis err: %w", err)
+			}
+
+			return old, nil
+		}
+	}
+
+	return model.Todo{}, fmt.Errorf("not found id: %s", id)
 }
 
 func (j *RepoRedis) Remove(ctx context.Context, id string) (model.Todo, error) {
-	panic("")
+	todos, err := j.GetAll(ctx)
+	if err != nil {
+		return model.Todo{}, err
+	}
+
+	old := model.Todo{}
+	var idOk bool
+	for _, v := range todos {
+		if v.Id == id {
+			idOk = true
+			old = v
+		}
+	}
+
+	if idOk == false {
+		return model.Todo{}, fmt.Errorf("not found id: %s", id)
+	}
+
+	err = j.rd.Del(ctx, redisKeyTodo(id)).Err()
+	if err != nil {
+		return model.Todo{}, fmt.Errorf("del redis err: %w", err)
+	}
+
+	return old, nil
 }
