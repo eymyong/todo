@@ -135,51 +135,34 @@ func (j *RepoRedis) UpdateData(ctx context.Context, id string, newdata string) (
 }
 
 func (j *RepoRedis) UpdateStatus(ctx context.Context, id string, status model.Status) (model.Todo, error) {
-	todos, err := j.GetAll(ctx)
-	if err != nil {
-		return model.Todo{}, err
-	}
-
 	statusOk := status.IsValid()
 	if statusOk != true {
 		return model.Todo{}, fmt.Errorf("bad status: %s", status)
 	}
 
-	old := model.Todo{}
-	for _, v := range todos {
-		if v.Id == id {
-			old = v
-			v.Status = status
-
-			err := j.rd.HSet(ctx, redisKeyTodo(id), "status", v.Status).Err()
-			if err != nil {
-				return model.Todo{}, fmt.Errorf("hset redis err: %w", err)
-			}
-
-			return old, nil
-		}
+	statusStr, err := j.rd.HGet(ctx, redisKeyTodo(id), "status").Result()
+	if err != nil {
+		return model.Todo{}, fmt.Errorf("hget redis err: %w", err)
 	}
 
-	return model.Todo{}, fmt.Errorf("not found id: %s", id)
+	err = j.rd.HSet(ctx, redisKeyTodo(id), "status", string(status)).Err()
+	if err != nil {
+		return model.Todo{}, fmt.Errorf("hset redis err: %w", err)
+	}
+
+	old := model.Todo{
+		Id:     id,
+		Status: model.Status(statusStr),
+	}
+
+	return old, nil
 }
 
 func (j *RepoRedis) Remove(ctx context.Context, id string) (model.Todo, error) {
-	todos, err := j.GetAll(ctx)
+
+	dataStr, err := j.rd.HGet(ctx, redisKeyTodo(id), "data").Result()
 	if err != nil {
-		return model.Todo{}, err
-	}
-
-	old := model.Todo{}
-	var idOk bool
-	for _, v := range todos {
-		if v.Id == id {
-			idOk = true
-			old = v
-		}
-	}
-
-	if idOk == false {
-		return model.Todo{}, fmt.Errorf("not found id: %s", id)
+		return model.Todo{}, fmt.Errorf("hget redis err: %w", err)
 	}
 
 	err = j.rd.Del(ctx, redisKeyTodo(id)).Err()
@@ -187,5 +170,5 @@ func (j *RepoRedis) Remove(ctx context.Context, id string) (model.Todo, error) {
 		return model.Todo{}, fmt.Errorf("del redis err: %w", err)
 	}
 
-	return old, nil
+	return model.Todo{Id: id, Data: dataStr}, nil
 }
