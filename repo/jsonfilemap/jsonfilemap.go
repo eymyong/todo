@@ -81,9 +81,6 @@ func (j *RepoJsonFileMap) Get(_ context.Context, id string) (model.Todo, error) 
 		return model.Todo{}, err
 	}
 
-	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
-	//fmt.Println(todoMap)
-
 	todo, ok := todoMap[id]
 	if !ok {
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
@@ -122,8 +119,6 @@ func (j *RepoJsonFileMap) UpdateData(_ context.Context, id string, newData strin
 		return model.Todo{}, err
 	}
 
-	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
-
 	old, ok := todoMap[id]
 	if !ok {
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
@@ -147,8 +142,6 @@ func (j *RepoJsonFileMap) UpdateStatus(_ context.Context, id string, newStatus m
 		return model.Todo{}, err
 	}
 
-	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
-
 	old, ok := todoMap[id]
 	if !ok {
 		return model.Todo{}, fmt.Errorf("no id: %s", id)
@@ -171,8 +164,6 @@ func (j *RepoJsonFileMap) Remove(_ context.Context, id string) (model.Todo, erro
 	if err != nil {
 		return model.Todo{}, err
 	}
-
-	// if todoMap = map[]  จะให้ return err ออกเลยและแจ้งว่า `no data`
 
 	todo, ok := todoMap[id]
 	if !ok {

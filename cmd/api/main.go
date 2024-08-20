@@ -10,11 +10,14 @@ import (
 	"github.com/eymyong/todo/repo"
 	"github.com/eymyong/todo/repo/jsonfile"
 	"github.com/eymyong/todo/repo/jsonfilemap"
+	"github.com/eymyong/todo/repo/textfile"
+	"github.com/eymyong/todo/repo/todoredis"
 )
 
 const JsonFile = "json"
 const JsonMap = "jsonmap"
 const TextFile = "text"
+const Redis = "redis"
 
 func initRepo() repo.Repository {
 	envRepo := os.Getenv("REPO")
@@ -22,22 +25,26 @@ func initRepo() repo.Repository {
 
 	var repo repo.Repository
 	switch envRepo {
+	case JsonFile:
+		if envFile == "" {
+			envFile = "todo.json"
+		}
+		repo = jsonfile.New(envFile)
+
 	case JsonMap:
 		if envFile == "" {
 			envFile = "todo.map.json"
 		}
-
 		repo = jsonfilemap.New(envFile)
 
-	case JsonFile:
-		fallthrough
-
-	default:
+	case TextFile:
 		if envFile == "" {
-			envFile = "todo.json"
+			envFile = "todo.text"
 		}
+		repo = textfile.New(envFile)
 
-		repo = jsonfile.New(envFile)
+	case Redis:
+		repo = todoredis.New("127.0.0.1:6379")
 	}
 
 	return repo
